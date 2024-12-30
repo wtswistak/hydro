@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    container_name: hydro_db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: hydro
+    ports:
+      - '4001:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
