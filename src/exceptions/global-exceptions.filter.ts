@@ -28,12 +28,15 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     const message =
       (exceptionResponse as any).message || 'Internal server error';
+    const errorCode =
+      (exceptionResponse as any).errorCode || 'INTERNAL_SERVER_ERROR';
     const finalMessage = Array.isArray(message) ? message[0] : message;
     this.logger.error(finalMessage);
     this.logger.error(exception.stack);
 
     response.status(status).json({
       statusCode: status,
+      errorCode,
       message: finalMessage,
       path: request.url,
       timestamp: new Date().toISOString(),
