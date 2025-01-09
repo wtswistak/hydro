@@ -28,8 +28,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     const message =
       (exceptionResponse as any).message || 'Internal server error';
-    const errorCode =
-      (exceptionResponse as any).errorCode || 'INTERNAL_SERVER_ERROR';
+    const errorCode = (exceptionResponse as any).errorCode || undefined;
     const finalMessage = Array.isArray(message) ? message[0] : message;
     this.logger.error(finalMessage);
     this.logger.error(exception.stack);
