@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { UserExistsException } from './exceptions/user-exists-exception';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -55,5 +56,31 @@ export class AuthService {
     return {
       accessToken: token,
     };
+  }
+
+  async changePassword(userId, { password, newPassword }: ChangePasswordDto) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    if (!user) {
+      throw new UnauthorizedException('User does not exist');
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid password');
+    }
+    const hashPassword = await bcrypt.hash(newPassword, 10);
+
+    await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        password: hashPassword,
+      },
+    });
   }
 }
