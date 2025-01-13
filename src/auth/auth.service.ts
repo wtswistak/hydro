@@ -83,4 +83,49 @@ export class AuthService {
       },
     });
   }
+
+  async refreshToken(refreshToken: string) {
+    let payload: any;
+    try {
+      payload = this.jwtService.verify(refreshToken, {
+        secret: process.env.REFRESH_TOKEN_SECRET,
+      });
+    } catch (error) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    const storedToken = await this.prisma.token.findUnique({
+      where: { token: refreshToken },
+    });
+
+    if (!storedToken || storedToken.expiresAt < new Date()) {
+      throw new UnauthorizedException(
+        'Refresh token has expired or is invalid',
+      );
+    }
+
+    const newAccessToken = this.jwtService.sign(
+      { sub: payload.sub, email: payload.email },
+      { secret: process.env.ACCESS_TOKEN_SECRET, expiresIn: '15m' },
+    );
+
+    const newRefreshToken = this.jwtService.sign(
+      { sub: payload.sub, email: payload.email },
+      { secret: process.env.REFRESH_TOKEN_SECRET, expiresIn: '7d' },
+    );
+
+    await this.prisma.token.update({
+      where: { token: refreshToken },
+      data: {
+        token: newRefreshToken,
+        updatedAt: new Date(),
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      },
+    });
+
+    return {
+      access_token: newAccessToken,
+      refresh_token: newRefreshToken,
+    };
+  }
 }

@@ -19,6 +19,13 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @Post('refresh-token')
+  @UseGuards(AuthGuard('jwt'))
+  refreshToken(@Req() req: any) {
+    const userId = req.user.id;
+    return this.authService.refreshToken(userId);
+  }
+
   @Patch('change-password')
   @UseGuards(AuthGuard('jwt'))
   changePassword(
