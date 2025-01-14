@@ -2,10 +2,12 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
-import { UserExistsException } from './exceptions/user-exists-exception';
+import { UserExistsException } from './exception/user-exists.exception';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { UserNotExistsException } from './exception/user-not-exists.exception';
+import { InvalidPasswordException } from './exception/invalid-password.exception';
 
 @Injectable()
 export class AuthService {
@@ -42,12 +44,12 @@ export class AuthService {
       },
     });
     if (!user) {
-      throw new UnauthorizedException('User does not exist');
+      throw new UserNotExistsException();
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid password');
+      throw new InvalidPasswordException();
     }
 
     const payload = { email: user.email, sub: user.id };
@@ -65,12 +67,12 @@ export class AuthService {
       },
     });
     if (!user) {
-      throw new UnauthorizedException('User does not exist');
+      throw new UserNotExistsException();
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid password');
+      throw new InvalidPasswordException();
     }
     const hashPassword = await bcrypt.hash(newPassword, 10);
 
