@@ -1,14 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
-import { GlobalExceptionFilter } from './exceptions/global-exceptions.filter';
+import { HttpExceptionFilter } from './exceptions/http-exceptions.filter';
 import { AppConfigService } from './config/app-config.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(AppConfigService);
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
-  app.useGlobalFilters(new GlobalExceptionFilter());
+  app.useGlobalFilters(new HttpExceptionFilter());
   const logger = new Logger('Main');
   app.useLogger(logger);
 
