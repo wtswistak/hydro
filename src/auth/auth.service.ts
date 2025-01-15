@@ -130,4 +130,12 @@ export class AuthService {
       refresh_token: newRefreshToken,
     };
   }
+
+  logout(refreshToken: string) {
+    this.prisma.token.delete({
+      where: {
+        token: refreshToken,
+      },
+    });
+  }
 }

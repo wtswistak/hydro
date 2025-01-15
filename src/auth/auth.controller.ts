@@ -35,4 +35,12 @@ export class AuthController {
     const userId = req.user.id;
     return this.authService.changePassword(userId, changePasswordDto);
   }
+
+  @Post('logout')
+  @UseGuards(AuthGuard('jwt'))
+  logout(@Req() req: any) {
+    const refreshToken = req.cookies.refreshToken;
+
+    return this.authService.logout(refreshToken);
+  }
 }
