@@ -35,12 +35,9 @@ export class AuthService {
         password: hashPassword,
       },
     });
-
-    const { password: _, ...result } = newUser;
-    return result;
   }
 
-  async login({ email, password }: LoginDto) {
+  async login({ email, password }: LoginDto): Promise<LoginResponseDto> {
     const user = await this.prisma.user.findUnique({
       where: {
         email,
@@ -63,7 +60,10 @@ export class AuthService {
     };
   }
 
-  async changePassword(userId, { password, newPassword }: ChangePasswordDto) {
+  async changePassword(
+    userId: number,
+    { password, newPassword }: ChangePasswordDto,
+  ) {
     const user = await this.prisma.user.findUnique({
       where: {
         id: userId,
@@ -79,7 +79,7 @@ export class AuthService {
     }
     const hashPassword = await bcrypt.hash(newPassword, 10);
 
-    await this.prisma.user.update({
+    this.prisma.user.update({
       where: {
         id: userId,
       },
@@ -104,9 +104,7 @@ export class AuthService {
     });
 
     if (!storedToken || storedToken.expiresAt < new Date()) {
-      throw new UnauthorizedException(
-        'Refresh token has expired or is invalid',
-      );
+      throw new UnauthorizedException('Invalid refresh token');
     }
 
     const newAccessToken = this.jwtService.sign(
@@ -129,8 +127,8 @@ export class AuthService {
     });
 
     return {
-      access_token: newAccessToken,
-      refresh_token: newRefreshToken,
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
     };
   }
 

@@ -1,4 +1,12 @@
-import { Body, Controller, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -22,7 +30,7 @@ export class AuthController {
   }
 
   @Post('login')
-  login(@Body() loginDto: LoginDto) {
+  login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
     return this.authService.login(loginDto);
   }
 
@@ -35,12 +43,13 @@ export class AuthController {
 
   @Patch('change-password')
   @UseGuards(AuthGuard('jwt'))
+  @HttpCode(204)
   changePassword(
     @Body() changePasswordDto: ChangePasswordDto,
     @Req() req: any,
-  ) {
+  ): void {
     const userId = req.user.id;
-    return this.authService.changePassword(userId, changePasswordDto);
+    this.authService.changePassword(userId, changePasswordDto);
   }
 
   @Post('logout')

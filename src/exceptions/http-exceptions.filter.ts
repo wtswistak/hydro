@@ -31,7 +31,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const errorCode = (exceptionResponse as any).errorCode || undefined;
     const finalMessage = Array.isArray(message) ? message[0] : message;
     this.logger.error(finalMessage);
-    this.logger.error(exception.stack);
+    console.log(exception.stack);
 
     response.status(status).json({
       statusCode: status,
