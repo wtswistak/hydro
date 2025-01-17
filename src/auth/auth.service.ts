@@ -8,6 +8,8 @@ import { JwtService } from '@nestjs/jwt';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UserNotExistsException } from './exception/user-not-exists.exception';
 import { InvalidPasswordException } from './exception/invalid-password.exception';
+import { User } from '@prisma/client';
+import { LoginResponseDto } from './dto/login-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +18,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async register({ email, password }: RegisterDto) {
+  async register({ email, password }: RegisterDto): Promise<User> {
     const user = await this.prisma.user.findUnique({
       where: {
         email,
@@ -26,7 +28,8 @@ export class AuthService {
       throw new UserExistsException();
     }
     const hashPassword = await bcrypt.hash(password, 10);
-    const newUser = await this.prisma.user.create({
+
+    return this.prisma.user.create({
       data: {
         email,
         password: hashPassword,
