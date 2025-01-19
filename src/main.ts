@@ -5,7 +5,7 @@ import {
   Logger,
   ValidationPipe,
 } from '@nestjs/common';
-import { HttpExceptionFilter } from './exceptions/http-exceptions.filter';
+import { HttpExceptionFilter } from './exception/http-exceptions.filter';
 import { AppConfigService } from './config/app-config.service';
 
 async function bootstrap() {
