@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { HttpExceptionFilter } from './exception/http-exceptions.filter';
 import { AppConfigService } from './config/app-config.service';
+import { ApiKeyGuard } from './middleware/api-key.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,6 +15,7 @@ async function bootstrap() {
   const configService = app.get(AppConfigService);
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalGuards(new ApiKeyGuard(configService));
   const logger = new Logger('Main');
   app.useLogger(logger);
 

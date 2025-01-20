@@ -5,4 +5,5 @@ export const validationSchema = Joi.object({
   NODE_ENV: Joi.string()
     .valid('development', 'stage', 'production')
     .default('development'),
+  API_KEY: Joi.string().required(),
 });

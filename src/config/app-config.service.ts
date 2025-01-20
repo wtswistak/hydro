@@ -11,4 +11,7 @@ export class AppConfigService {
   get nodeEnv(): string {
     return this.configService.get<string>('NODE_ENV');
   }
+  get apiKey(): string {
+    return this.configService.get<string>('API_KEY');
+  }
 }
