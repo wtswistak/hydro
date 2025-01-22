@@ -11,12 +11,32 @@ import { InvalidPasswordException } from './exception/invalid-password.exception
 import { User } from '@prisma/client';
 import { LoginResponseDto } from './dto/login-response.dto';
 
+interface TokenPayload {
+  sub: number;
+  email: string;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private readonly jwtService: JwtService,
   ) {}
+
+  private async generateTokens(payload: TokenPayload) {
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: process.env.ACCESS_TOKEN_SECRET,
+        expiresIn: '15m',
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: process.env.REFRESH_TOKEN_SECRET,
+        expiresIn: '7d',
+      }),
+    ]);
+
+    return { accessToken, refreshToken };
+  }
 
   async register({ email, password }: RegisterDto): Promise<User> {
     const user = await this.prisma.user.findUnique({
@@ -52,12 +72,12 @@ export class AuthService {
       throw new InvalidPasswordException();
     }
 
-    const payload = { email: user.email, sub: user.id };
-    const token = this.jwtService.sign(payload);
+    const tokens = await this.generateTokens({
+      sub: user.id,
+      email: user.email,
+    });
 
-    return {
-      accessToken: token,
-    };
+    return tokens;
   }
 
   async changePassword(
@@ -90,52 +110,45 @@ export class AuthService {
   }
 
   async refreshToken(refreshToken: string) {
-    let payload: any;
-    try {
-      payload = this.jwtService.verify(refreshToken, {
+    const payload = await this.jwtService.verifyAsync<TokenPayload>(
+      refreshToken,
+      {
         secret: process.env.REFRESH_TOKEN_SECRET,
-      });
-    } catch (error) {
-      throw new UnauthorizedException('Invalid refresh token');
-    }
-
+      },
+    );
     const storedToken = await this.prisma.token.findUnique({
       where: { token: refreshToken },
     });
 
-    if (!storedToken || storedToken.expiresAt < new Date()) {
+    if (
+      !storedToken ||
+      storedToken.revokedAt ||
+      storedToken.expiresAt < new Date()
+    ) {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    const newAccessToken = this.jwtService.sign(
-      { sub: payload.sub, email: payload.email },
-      { secret: process.env.ACCESS_TOKEN_SECRET, expiresIn: '15m' },
-    );
-
-    const newRefreshToken = this.jwtService.sign(
-      { sub: payload.sub, email: payload.email },
-      { secret: process.env.REFRESH_TOKEN_SECRET, expiresIn: '7d' },
-    );
+    const tokens = await this.generateTokens({
+      sub: payload.sub,
+      email: payload.email,
+    });
 
     await this.prisma.token.update({
-      where: { token: refreshToken },
+      where: { id: storedToken.id },
       data: {
-        token: newRefreshToken,
-        updatedAt: new Date(),
+        token: tokens.refreshToken,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },
     });
 
-    return {
-      accessToken: newAccessToken,
-      refreshToken: newRefreshToken,
-    };
+    return tokens;
   }
 
   logout(refreshToken: string) {
-    this.prisma.token.delete({
-      where: {
-        token: refreshToken,
+    this.prisma.token.update({
+      where: { token: refreshToken },
+      data: {
+        revokedAt: new Date(),
       },
     });
   }
