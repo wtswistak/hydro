@@ -10,6 +10,7 @@ import { UserNotExistsException } from './exception/user-not-exists.exception';
 import { InvalidPasswordException } from './exception/invalid-password.exception';
 import { User } from '@prisma/client';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { NotificationService } from 'src/notification/notification.service';
 
 interface TokenPayload {
   sub: number;
@@ -21,6 +22,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private notificationService: NotificationService,
   ) {}
 
   private async generateTokens(payload: TokenPayload) {
@@ -49,6 +51,8 @@ export class AuthService {
     }
     const hashPassword = await bcrypt.hash(password, 10);
 
+    const verificationToken = await bcrypt.hash(email, 10);
+    this.notificationService.sendVerificationEmail(email, verificationToken);
     return this.prisma.user.create({
       data: {
         email,

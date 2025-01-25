@@ -14,4 +14,13 @@ export class AppConfigService {
   get apiKey(): string {
     return this.configService.get<string>('API_KEY');
   }
+  get mailersendApiKey(): string {
+    return this.configService.get<string>('MAILERSEND_API_KEY');
+  }
+  get mailersendApiUrl(): string {
+    return this.configService.get<string>('MAILERSEND_API_URL');
+  }
+  get mailersendDomain(): string {
+    return this.configService.get<string>('MAILERSEND_DOMAIN');
+  }
 }
