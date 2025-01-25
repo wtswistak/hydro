@@ -52,7 +52,10 @@ export class AuthService {
     const hashPassword = await bcrypt.hash(password, 10);
 
     const verificationToken = await bcrypt.hash(email, 10);
-    this.notificationService.sendVerificationEmail(email, verificationToken);
+    this.notificationService.sendVerificationEmail({
+      email,
+      token: verificationToken,
+    });
     return this.prisma.user.create({
       data: {
         email,
