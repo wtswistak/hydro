@@ -15,6 +15,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { RegisterResponseDto } from './dto/register-response.dto';
 import { plainToClass } from 'class-transformer';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -58,5 +59,11 @@ export class AuthController {
     const refreshToken = req.cookies.refreshToken;
 
     return this.authService.logout(refreshToken);
+  }
+
+  @Post('verify-email')
+  @HttpCode(204)
+  verifyEmail(@Body('token') verifyEmailDto: VerifyEmailDto): void {
+    this.authService.verifyEmail(verifyEmailDto);
   }
 }

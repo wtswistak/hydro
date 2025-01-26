@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as crypto from 'crypto';
 import { RegisterDto } from './dto/register.dto';
@@ -12,6 +12,7 @@ import { InvalidPasswordException } from './exception/invalid-password.exception
 import { User } from '@prisma/client';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { NotificationService } from 'src/notification/notification.service';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 
 interface TokenPayload {
   sub: number;
@@ -20,6 +21,7 @@ interface TokenPayload {
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   constructor(
     private prisma: PrismaService,
     private readonly jwtService: JwtService,
@@ -177,5 +179,33 @@ export class AuthService {
         revokedAt: new Date(),
       },
     });
+  }
+
+  async verifyEmail({ token }: VerifyEmailDto): Promise<void> {
+    const result = await this.prisma.$transaction(async (prisma) => {
+      const emailVerification = await prisma.emailVerification.findUnique({
+        where: {
+          token,
+          expiresAt: {
+            gte: new Date(),
+          },
+        },
+      });
+      if (!emailVerification) {
+        throw new UnauthorizedException('Invalid or expired token');
+      }
+
+      const user = await prisma.user.update({
+        where: { id: emailVerification.userId },
+        data: { emailVerified: true },
+      });
+
+      await prisma.emailVerification.delete({
+        where: { id: emailVerification.id },
+      });
+
+      return user;
+    });
+    this.logger.log(`Email verified for user: ${result.id}`);
   }
 }
