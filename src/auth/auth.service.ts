@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import * as crypto from 'crypto';
 import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
 import { UserExistsException } from './exception/user-exists.exception';
@@ -51,17 +52,35 @@ export class AuthService {
     }
     const hashPassword = await bcrypt.hash(password, 10);
 
-    const verificationToken = await bcrypt.hash(email, 10);
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const expiresTime = 24 * 60 * 60 * 1000;
+    const expiresAt = new Date(Date.now() + expiresTime);
+
+    const result = await this.prisma.$transaction(async (prisma) => {
+      const newUser = await prisma.user.create({
+        data: {
+          email,
+          password: hashPassword,
+        },
+      });
+
+      await prisma.emailVerification.create({
+        data: {
+          token: verificationToken,
+          expiresAt,
+          userId: newUser.id,
+        },
+      });
+
+      return newUser;
+    });
+
     this.notificationService.sendVerificationEmail({
       email,
       token: verificationToken,
     });
-    return this.prisma.user.create({
-      data: {
-        email,
-        password: hashPassword,
-      },
-    });
+
+    return result;
   }
 
   async login({ email, password }: LoginDto): Promise<LoginResponseDto> {
