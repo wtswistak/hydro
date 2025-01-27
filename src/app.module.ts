@@ -7,6 +7,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AppConfigModule } from './config/app-config.module';
 import { NotificationModule } from './notification/notification.module';
 import { MailersendService } from './notification/mailersend.service';
+import { BinanceModule } from './binance/binance.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { MailersendService } from './notification/mailersend.service';
     PrismaModule,
     AppConfigModule,
     NotificationModule,
+    BinanceModule,
   ],
   controllers: [AppController],
   providers: [AppService, MailersendService],

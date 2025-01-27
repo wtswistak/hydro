@@ -23,4 +23,13 @@ export class AppConfigService {
   get mailersendDomain(): string {
     return this.configService.get<string>('MAILERSEND_DOMAIN');
   }
+  get binanceApiUrl(): string {
+    return this.configService.get<string>('BINANCE_API_URL');
+  }
+  get httpTimeout(): number {
+    return this.configService.get<number>('HTTP_TIMEOUT');
+  }
+  get maxRedirects(): number {
+    return this.configService.get<number>('MAX_REDIRECTS');
+  }
 }
