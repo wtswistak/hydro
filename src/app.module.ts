@@ -8,6 +8,7 @@ import { AppConfigModule } from './config/app-config.module';
 import { NotificationModule } from './notification/notification.module';
 import { MailersendService } from './notification/mailersend.service';
 import { BinanceModule } from './binance/binance.module';
+import { CoingeckoModule } from './coingecko/coingecko.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { BinanceModule } from './binance/binance.module';
     AppConfigModule,
     NotificationModule,
     BinanceModule,
+    CoingeckoModule,
   ],
   controllers: [AppController],
   providers: [AppService, MailersendService],

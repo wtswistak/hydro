@@ -32,4 +32,7 @@ export class AppConfigService {
   get maxRedirects(): number {
     return this.configService.get<number>('MAX_REDIRECTS');
   }
+  get coingeckoApiUrl(): string {
+    return this.configService.get<string>('COINGECKO_API_URL');
+  }
 }
