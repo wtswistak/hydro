@@ -9,15 +9,16 @@ export class CoingeckoService {
 
   async getCryptocurrenciesList() {
     try {
-      const data = await firstValueFrom(
+      const { data } = await firstValueFrom(
         this.httpService.get(
-          'coins/markets/?vs_currency=usd&per_page=100&page=1',
+          'coins/markets?vs_currency=usd&per_page=10&page=1',
         ),
       );
 
       return data;
     } catch (error) {
-      throw new Error(error);
+      console.log('ssoksoskos', error);
+      // throw new Error(error);
     }
   }
 }
