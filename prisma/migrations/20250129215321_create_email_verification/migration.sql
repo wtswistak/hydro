@@ -3,6 +3,8 @@ CREATE TABLE "email_verification" (
     "id" SERIAL NOT NULL,
     "user_id" INTEGER NOT NULL,
     "token" TEXT NOT NULL,
+    "used" BOOLEAN NOT NULL DEFAULT false,
+    "usedAt" TIMESTAMP(3),
     "expires_at" TIMESTAMP(3) NOT NULL,
     "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(3) NOT NULL,

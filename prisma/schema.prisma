@@ -46,6 +46,8 @@ model EmailVerification {
   id         Int       @id @default(autoincrement())
   userId     Int       @map("user_id")
   token      String    @unique
+  used       Boolean   @default(false)
+  usedAt     DateTime?
   expiresAt  DateTime  @map("expires_at")
   createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)

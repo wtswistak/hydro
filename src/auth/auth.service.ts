@@ -59,6 +59,7 @@ export class AuthService {
     const expiresAt = new Date(Date.now() + expiresTime);
 
     const result = await this.prisma.$transaction(async (prisma) => {
+      this.logger.log(`Creating user with email: ${email}`);
       const newUser = await prisma.user.create({
         data: {
           email,
@@ -104,6 +105,7 @@ export class AuthService {
       sub: user.id,
       email: user.email,
     });
+    this.logger.log(`User logged in: ${user.id}`);
 
     return tokens;
   }
@@ -181,11 +183,12 @@ export class AuthService {
     });
   }
 
-  async verifyEmail({ token }: VerifyEmailDto): Promise<void> {
+  async verifyEmail(token: string): Promise<void> {
     const result = await this.prisma.$transaction(async (prisma) => {
       const emailVerification = await prisma.emailVerification.findUnique({
         where: {
           token,
+          used: false,
           expiresAt: {
             gte: new Date(),
           },
@@ -200,8 +203,12 @@ export class AuthService {
         data: { emailVerified: true },
       });
 
-      await prisma.emailVerification.delete({
+      await prisma.emailVerification.update({
         where: { id: emailVerification.id },
+        data: {
+          used: true,
+          usedAt: new Date(),
+        },
       });
 
       return user;

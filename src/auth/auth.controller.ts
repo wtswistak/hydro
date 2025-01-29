@@ -63,7 +63,7 @@ export class AuthController {
 
   @Post('verify-email')
   @HttpCode(204)
-  verifyEmail(@Body('token') verifyEmailDto: VerifyEmailDto): void {
-    this.authService.verifyEmail(verifyEmailDto);
+  verifyEmail(@Body() verifyEmailDto: VerifyEmailDto): void {
+    this.authService.verifyEmail(verifyEmailDto.token);
   }
 }
