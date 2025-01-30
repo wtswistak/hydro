@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ICryptocurrency } from './interface/cryptocurrency.interface';
 
@@ -7,6 +7,18 @@ import { ICryptocurrency } from './interface/cryptocurrency.interface';
 export class CoingeckoService {
   private readonly logger = new Logger(CoingeckoService.name);
   constructor(private readonly httpService: HttpService) {}
+
+  private handleError(error: any, message: string): void {
+    const { status, data } = error.response;
+    if (data?.error) {
+      this.logger.error(`Coingeco API error in ${message}`);
+      this.logger.error(`Error: ${data.error}, Status: ${status}`);
+    } else {
+      this.logger.error(`Unknown error:', ${error}`);
+    }
+
+    throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
 
   async getCryptocurrencies(): Promise<ICryptocurrency[]> {
     try {
@@ -18,8 +30,7 @@ export class CoingeckoService {
 
       return data;
     } catch (error) {
-      console.log('ssoksoskos', error);
-      // throw new Error(error);
+      this.handleError(error, 'getCryptocurrencies');
     }
   }
 }
