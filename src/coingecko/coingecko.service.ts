@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
-import { ICryptocurrency } from './interface/cryptocurrency.interface';
+import { CryptocurrencyDto } from './dto/cryptocurrency.dto';
 
 @Injectable()
 export class CoingeckoService {
@@ -20,10 +20,10 @@ export class CoingeckoService {
     throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  async getCryptocurrencies(): Promise<ICryptocurrency[]> {
+  async getCryptocurrencies(): Promise<CryptocurrencyDto[]> {
     try {
       const { data } = await firstValueFrom(
-        this.httpService.get<ICryptocurrency[]>(
+        this.httpService.get<CryptocurrencyDto[]>(
           'coins/markets?vs_currency=usd&per_page=10&page=1',
         ),
       );
