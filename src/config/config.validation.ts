@@ -6,4 +6,10 @@ export const validationSchema = Joi.object({
     .valid('development', 'stage', 'production')
     .default('development'),
   API_KEY: Joi.string().required(),
+  MAILERSEND_API_KEY: Joi.string().required(),
+  MAILERSEND_API_URL: Joi.string().required(),
+  MAILERSEND_DOMAIN: Joi.string().required(),
+  HTTP_TIMEOUT: Joi.number().default(5000),
+  MAX_REDIRECTS: Joi.number().default(5),
+  COINGECKO_API_URL: Joi.string().required(),
 });
