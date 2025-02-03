@@ -1,7 +1,10 @@
 import { HttpService } from '@nestjs/axios';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
-import { CryptocurrencyDto } from './dto/cryptocurrency.dto';
+import { MarketChartDto } from './dto/market-chart.dto';
+import { MarketChart } from './interface/market-chart-response';
+import { Cryptocurrency } from './interface/cryptocurrency.interface';
+import { convertKeysToCamel } from 'src/utils/convert-to-camel';
 
 @Injectable()
 export class CoingeckoService {
@@ -20,17 +23,33 @@ export class CoingeckoService {
     throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  async getCryptocurrencies(): Promise<CryptocurrencyDto[]> {
+  async getCryptocurrencies(): Promise<Cryptocurrency[]> {
     try {
       const { data } = await firstValueFrom(
-        this.httpService.get<CryptocurrencyDto[]>(
+        this.httpService.get(
           'coins/markets?vs_currency=usd&per_page=10&page=1',
         ),
       );
+      const formatData = convertKeysToCamel(data);
 
-      return data;
+      return formatData;
     } catch (error) {
       this.handleError(error, 'getCryptocurrencies');
+    }
+  }
+
+  async getMarketChart({ id, days }: MarketChartDto): Promise<MarketChart> {
+    try {
+      const { data } = await firstValueFrom(
+        this.httpService.get(
+          `coins/${id}/market_chart?vs_currency=usd&days=${days}`,
+        ),
+      );
+      const formatData = convertKeysToCamel(data);
+
+      return formatData;
+    } catch (error) {
+      this.handleError(error, 'getMarketChart');
     }
   }
 }

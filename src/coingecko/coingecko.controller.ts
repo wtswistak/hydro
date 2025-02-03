@@ -1,6 +1,9 @@
-import { Controller, Get, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { CoingeckoService } from './coingecko.service';
 import { AuthGuard } from '@nestjs/passport';
+import { MarketChartDto } from './dto/market-chart.dto';
+import { MarketChart } from './interface/market-chart-response';
+import { Cryptocurrency } from './interface/cryptocurrency.interface';
 
 @Controller('coingecko')
 export class CoingeckoController {
@@ -8,7 +11,13 @@ export class CoingeckoController {
 
   @Get('cryptocurrencies')
   @UseGuards(AuthGuard('jwt'))
-  getCryptocurrenciesList() {
+  getCryptocurrenciesList(): Promise<Cryptocurrency[]> {
     return this.coingeckoService.getCryptocurrencies();
+  }
+
+  @Get('market-chart/:id/:days')
+  @UseGuards(AuthGuard('jwt'))
+  getMarketChart(@Param() params: MarketChartDto): Promise<MarketChart> {
+    return this.coingeckoService.getMarketChart(params);
   }
 }
