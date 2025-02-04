@@ -9,6 +9,7 @@ import { NotificationModule } from './notification/notification.module';
 import { MailersendService } from './notification/mailersend.service';
 import { BinanceModule } from './binance/binance.module';
 import { CoingeckoModule } from './coingecko/coingecko.module';
+import { BlockchainModule } from './blockchain/blockchain.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { CoingeckoModule } from './coingecko/coingecko.module';
     NotificationModule,
     BinanceModule,
     CoingeckoModule,
+    BlockchainModule,
   ],
   controllers: [AppController],
   providers: [AppService, MailersendService],
