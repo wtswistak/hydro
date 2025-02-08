@@ -13,6 +13,8 @@ export class BlockchainController {
 
   @Post('send-transaction')
   sendTransaction(@Body() sendTransactionDto: SendTransactionDto) {
-    return this.blockchainService.sendTransaction(sendTransactionDto);
+    return this.blockchainService.sendTransactionByPrivateWallet(
+      sendTransactionDto,
+    );
   }
 }

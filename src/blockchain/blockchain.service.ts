@@ -6,22 +6,25 @@ import { SendTransactionDto } from './dto/send-transaction.dto';
 @Injectable()
 export class BlockchainService {
   private readonly provider = new JsonRpcProvider();
-  private readonly wallet: ethers.Wallet;
+  private readonly privateWallet: ethers.Wallet;
 
   constructor(private readonly configService: AppConfigService) {
     this.provider = new JsonRpcProvider(configService.ethNodeUrl);
-    this.wallet = new ethers.Wallet(configService.privateKey, this.provider);
+    this.privateWallet = new ethers.Wallet(
+      configService.privateKey,
+      this.provider,
+    );
   }
 
-  async sendTransaction({ to, amount }: SendTransactionDto) {
+  async sendTransactionByPrivateWallet({ to, amount }: SendTransactionDto) {
     try {
-      const trx = await this.wallet.sendTransaction({
+      const trx = {
         to,
         value: ethers.parseEther(amount.toString()),
         gasLimit: ethers.hexlify('0x5208'),
         gasPrice: (await this.provider.getFeeData()).gasPrice,
-      });
-      const transaction = await this.wallet.sendTransaction(trx);
+      };
+      const transaction = await this.privateWallet.sendTransaction(trx);
 
       return transaction;
     } catch (error) {
@@ -31,5 +34,26 @@ export class BlockchainService {
   }
   async getBlockNumber(): Promise<number> {
     return this.provider.getBlockNumber();
+  }
+
+  async createWallet() {
+    return ethers.Wallet.createRandom();
+  }
+
+  async sendTransaction({ to, amount, privateKey }) {
+    try {
+      const wallet = new ethers.Wallet(privateKey, this.provider);
+      const tx = await wallet.sendTransaction({
+        to,
+        value: ethers.parseEther(amount.toString()),
+        gasLimit: 21000,
+        gasPrice: (await this.provider.getFeeData()).gasPrice,
+      });
+
+      return tx;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
   }
 }
