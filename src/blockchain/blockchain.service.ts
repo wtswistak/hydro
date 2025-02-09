@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { ethers, JsonRpcProvider } from 'ethers';
 import { AppConfigService } from 'src/config/app-config.service';
 import { SendTransactionDto } from './dto/send-transaction.dto';
@@ -7,6 +7,7 @@ import { SendTransactionDto } from './dto/send-transaction.dto';
 export class BlockchainService {
   private readonly provider = new JsonRpcProvider();
   private readonly privateWallet: ethers.Wallet;
+  private readonly logger = new Logger(BlockchainService.name);
 
   constructor(private readonly configService: AppConfigService) {
     this.provider = new JsonRpcProvider(configService.ethNodeUrl);
@@ -14,6 +15,18 @@ export class BlockchainService {
       configService.privateKey,
       this.provider,
     );
+  }
+
+  private handleError(error: any, message: string): void {
+    if (error.message) {
+      this.logger.error(error.message);
+    }
+
+    throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  createWallet() {
+    return ethers.Wallet.createRandom();
   }
 
   async sendTransactionByPrivateWallet({ to, amount }: SendTransactionDto) {
@@ -28,16 +41,13 @@ export class BlockchainService {
 
       return transaction;
     } catch (error) {
-      console.error(error);
+      this.handleError(error, 'sendTransactionByPrivateWallet');
       return null;
     }
   }
-  async getBlockNumber(): Promise<number> {
-    return this.provider.getBlockNumber();
-  }
 
-  async createWallet() {
-    return ethers.Wallet.createRandom();
+  getBlockNumber(): Promise<number> {
+    return this.provider.getBlockNumber();
   }
 
   async sendTransaction({ to, amount, privateKey }) {
@@ -52,8 +62,7 @@ export class BlockchainService {
 
       return tx;
     } catch (error) {
-      console.error(error);
-      return null;
+      this.handleError(error, 'sendTransaction');
     }
   }
 }

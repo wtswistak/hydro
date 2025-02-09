@@ -35,4 +35,10 @@ export class AppConfigService {
   get coingeckoApiUrl(): string {
     return this.configService.get<string>('COINGECKO_API_URL');
   }
+  get ethNodeUrl(): string {
+    return this.configService.get<string>('ETH_NODE_URL');
+  }
+  get privateKey(): string {
+    return this.configService.get<string>('PRIVATE_KEY');
+  }
 }

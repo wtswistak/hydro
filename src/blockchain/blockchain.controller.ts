@@ -11,10 +11,22 @@ export class BlockchainController {
     return this.blockchainService.getBlockNumber();
   }
 
-  @Post('send-transaction')
-  sendTransaction(@Body() sendTransactionDto: SendTransactionDto) {
+  @Post('send-transaction-by-wallet')
+  sendTransactionByPrivateWallet(
+    @Body() sendTransactionDto: SendTransactionDto,
+  ) {
     return this.blockchainService.sendTransactionByPrivateWallet(
       sendTransactionDto,
     );
+  }
+
+  @Post('create-wallet')
+  createWallet() {
+    return this.blockchainService.createWallet();
+  }
+
+  @Post('send-transaction')
+  sendTransaction(@Body() { to, amount, privateKey }) {
+    return this.blockchainService.sendTransaction({ to, amount, privateKey });
   }
 }
