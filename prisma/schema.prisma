@@ -24,8 +24,22 @@ model User {
 
   tokens Token[]
   emailVerifications EmailVerification[]
+  wallets Wallet[]
 
   @@map("user")
+}
+
+model Wallet {
+  id              Int      @id @default(autoincrement())
+  userId          Int      @map("user_id")
+  address         String   @unique
+  privateKey      String
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt       DateTime? @map("deleted_at")
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("wallet")
 }
 
 model Token {
