@@ -41,4 +41,7 @@ export class AppConfigService {
   get privateKey(): string {
     return this.configService.get<string>('PRIVATE_KEY');
   }
+  get cryptoKey(): string {
+    return this.configService.get<string>('CRYPTO_KEY');
+  }
 }
