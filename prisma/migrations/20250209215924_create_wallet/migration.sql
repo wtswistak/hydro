@@ -3,7 +3,7 @@ CREATE TABLE "wallet" (
     "id" SERIAL NOT NULL,
     "user_id" INTEGER NOT NULL,
     "address" TEXT NOT NULL,
-    "privateKey" TEXT NOT NULL,
+    "private_key" TEXT NOT NULL,
     "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),

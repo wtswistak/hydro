@@ -42,7 +42,6 @@ export class BlockchainService {
       return transaction;
     } catch (error) {
       this.handleError(error, 'sendTransactionByPrivateWallet');
-      return null;
     }
   }
 

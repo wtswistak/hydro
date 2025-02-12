@@ -33,7 +33,7 @@ model Wallet {
   id              Int      @id @default(autoincrement())
   userId          Int      @map("user_id")
   address         String   @unique
-  privateKey      String
+  privateKey      String   @map("private_key")
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt       DateTime? @map("deleted_at")
