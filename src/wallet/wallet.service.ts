@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CryptoService } from './crypto.service';
+import { Wallet } from '@prisma/client';
 
 @Injectable()
 export class WalletService {
@@ -12,7 +13,8 @@ export class WalletService {
     private cryptoService: CryptoService,
   ) {}
 
-  async createWallet(userId: number) {
+  async createWallet({ userId }: { userId: number }): Promise<Wallet> {
+    this.logger.log(`Creating wallet for user with id: ${userId}`);
     const blockchainWallet = this.blockchainService.createWallet();
     const encryptedPrivateKey = this.cryptoService.encrypt({
       privateKey: blockchainWallet.privateKey,
