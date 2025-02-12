@@ -1,14 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EmailParams, MailerSend, Recipient, Sender } from 'mailersend';
 import { AppConfigService } from 'src/config/app-config.service';
-import { ISendEmail } from './interface/send-email.dto';
+import { SendEmail } from './interface/send-email.interface';
 
 @Injectable()
 export class MailersendService {
   private readonly logger = new Logger(MailersendService.name);
   constructor(private readonly configService: AppConfigService) {}
 
-  async sendEmail({ receipent, subject, html }: ISendEmail) {
+  async sendEmail({ receipent, subject, html }: SendEmail) {
     const mailerSend = new MailerSend({
       apiKey: this.configService.mailersendApiKey,
     });
