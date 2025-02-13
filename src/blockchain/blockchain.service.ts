@@ -64,4 +64,14 @@ export class BlockchainService {
       this.handleError(error, 'sendTransaction');
     }
   }
+
+  async getBalance({ address }: { address: string }): Promise<string> {
+    try {
+      const balance = await this.provider.getBalance(address);
+
+      return ethers.formatEther(balance);
+    } catch (error) {
+      this.handleError(error, 'getBalance');
+    }
+  }
 }

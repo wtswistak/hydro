@@ -45,4 +45,13 @@ export class WalletService {
       },
     });
   }
+
+  async getBalance({ userId }: { userId: number }): Promise<string> {
+    const wallet = await this.getWalletByUserId({ userId });
+    const balance = this.blockchainService.getBalance({
+      address: wallet.address,
+    });
+
+    return balance;
+  }
 }

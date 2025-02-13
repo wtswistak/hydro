@@ -1,4 +1,4 @@
-import { Controller, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Wallet } from '@prisma/client';
@@ -12,5 +12,12 @@ export class WalletController {
   createWallet(@Req() req: any): Promise<Wallet> {
     const userId = req.user.id;
     return this.walletService.createWallet({ userId });
+  }
+
+  @Get('balance')
+  @UseGuards(AuthGuard('jwt'))
+  getBalance(@Req() req: any): Promise<string> {
+    const userId = req.user.id;
+    return this.walletService.getBalance({ userId });
   }
 }
