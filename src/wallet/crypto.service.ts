@@ -6,7 +6,7 @@ import { AppConfigService } from 'src/config/app-config.service';
 export class CryptoService {
   private readonly CRYPTO_KEY: Buffer;
   constructor(private readonly configService: AppConfigService) {
-    const CRYPTO_KEY = Buffer.from(this.configService.cryptoKey, 'hex');
+    this.CRYPTO_KEY = Buffer.from(this.configService.cryptoKey, 'hex');
   }
 
   encrypt({ privateKey }: { privateKey: string }) {

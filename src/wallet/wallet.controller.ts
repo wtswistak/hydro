@@ -11,6 +11,6 @@ export class WalletController {
   @UseGuards(AuthGuard('jwt'))
   createWallet(@Req() req: any): Promise<Wallet> {
     const userId = req.user.id;
-    return this.walletService.createWallet(userId);
+    return this.walletService.createWallet({ userId });
   }
 }

@@ -3,6 +3,7 @@ import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CryptoService } from './crypto.service';
 import { Wallet } from '@prisma/client';
+import { WalletExistsException } from './exception/wallet-exist.exception';
 
 @Injectable()
 export class WalletService {
@@ -14,6 +15,12 @@ export class WalletService {
   ) {}
 
   async createWallet({ userId }: { userId: number }): Promise<Wallet> {
+    this.logger.log(`Checking if wallet exists for user with id: ${userId}`);
+    const existingWallet = await this.getWalletByUserId({ userId });
+    if (existingWallet) {
+      throw new WalletExistsException();
+    }
+
     this.logger.log(`Creating wallet for user with id: ${userId}`);
     const blockchainWallet = this.blockchainService.createWallet();
     const encryptedPrivateKey = this.cryptoService.encrypt({
@@ -29,5 +36,13 @@ export class WalletService {
     this.logger.log(`Created wallet for user with id: ${userId}`);
 
     return wallet;
+  }
+
+  getWalletByUserId({ userId }: { userId: number }): Promise<Wallet> {
+    return this.prisma.wallet.findFirst({
+      where: {
+        userId,
+      },
+    });
   }
 }
