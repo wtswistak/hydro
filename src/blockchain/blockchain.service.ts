@@ -49,17 +49,23 @@ export class BlockchainService {
     return this.provider.getBlockNumber();
   }
 
-  async sendTransaction({ to, amount, privateKey }) {
+  async sendTransaction({ receiverAddress, amount, privateKey }) {
     try {
       const wallet = new ethers.Wallet(privateKey, this.provider);
       const tx = await wallet.sendTransaction({
-        to,
+        to: receiverAddress,
         value: ethers.parseEther(amount.toString()),
-        gasLimit: 21000,
-        gasPrice: (await this.provider.getFeeData()).gasPrice,
       });
+      console.log(tx);
 
-      return tx;
+      this.logger.log(`Transaction created with hash: ${tx.hash}`);
+      return {
+        hash: tx.hash,
+        blockNumber: tx.blockNumber,
+        to: tx.to,
+        from: tx.from,
+        value: ethers.formatEther(tx.value),
+      };
     } catch (error) {
       this.handleError(error, 'sendTransaction');
     }

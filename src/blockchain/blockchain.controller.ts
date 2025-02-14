@@ -24,9 +24,4 @@ export class BlockchainController {
   createWallet() {
     return this.blockchainService.createWallet();
   }
-
-  @Post('send-transaction')
-  sendTransaction(@Body() { to, amount, privateKey }) {
-    return this.blockchainService.sendTransaction({ to, amount, privateKey });
-  }
 }

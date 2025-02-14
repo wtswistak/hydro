@@ -54,4 +54,21 @@ export class WalletService {
 
     return balance;
   }
+
+  async createTransaction({ userId, receiverAddress, amount }) {
+    this.logger.log(
+      `Creating transaction for user with id: ${userId}, receiverAddress: ${receiverAddress}, amount: ${amount}`,
+    );
+    const wallet = await this.getWalletByUserId({ userId });
+    const decryptedPrivateKey = this.cryptoService.decrypt({
+      encryptedKey: wallet.privateKey,
+    });
+    const transaction = await this.blockchainService.sendTransaction({
+      receiverAddress,
+      amount,
+      privateKey: decryptedPrivateKey,
+    });
+
+    return transaction;
+  }
 }
