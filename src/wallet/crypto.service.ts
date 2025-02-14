@@ -24,9 +24,9 @@ export class CryptoService {
 
   decrypt({ encryptedKey }: { encryptedKey: string }) {
     const dataBuffer = Buffer.from(encryptedKey, 'hex');
-    const iv = dataBuffer.subarray(0, 12);
-    const tag = dataBuffer.subarray(12, 28);
-    const encryptedData = dataBuffer.subarray(28);
+    const iv = dataBuffer.subarray(0, 16);
+    const tag = dataBuffer.subarray(16, 32);
+    const encryptedData = dataBuffer.subarray(32);
     const decipher = createDecipheriv('aes-256-gcm', this.CRYPTO_KEY, iv);
     decipher.setAuthTag(tag);
     const decrypted = Buffer.concat([
