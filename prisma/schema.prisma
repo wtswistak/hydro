@@ -75,17 +75,15 @@ model EmailVerification {
 
 model Transaction {
   id              Int                   @id @default(autoincrement())
-  userId          Int                   @map("user_id")
+  walletId        Int                   @map("wallet_id")
   amount          Decimal
   status          TransactionStatus     @default(PENDING)
-  walletId        Int                   @map("wallet_id")
   receiverAddress String
   hash            String                @unique
   chainId         BigInt
   createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   wallet     Wallet    @relation(fields: [walletId], references: [id], onDelete: Cascade)
 
   @@map("transaction")
