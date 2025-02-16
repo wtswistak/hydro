@@ -39,7 +39,7 @@ model Wallet {
   deletedAt       DateTime? @map("deleted_at")
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  transactions Transaction[]
+  balances Balance[]
 
   @@map("wallet")
 }
@@ -75,18 +75,49 @@ model EmailVerification {
 
 model Transaction {
   id              Int                   @id @default(autoincrement())
-  walletId        Int                   @map("wallet_id")
+  balanceId       Int                   @map("balance_id")
   amount          Decimal
   status          TransactionStatus     @default(PENDING)
   receiverAddress String
   hash            String                @unique
   chainId         BigInt
-  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  wallet     Wallet    @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  balance         Balance    @relation(fields: [balanceId], references: [id], onDelete: Cascade)
 
   @@map("transaction")
+}
+
+model Balance {
+  id              Int                   @id @default(autoincrement())
+  walletId        Int                   @map("wallet_id")
+  amount          Decimal
+  cryptoTokenId   Int                   @map("cryptoToken_id")
+  createdAt       DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt       DateTime?             @map("deleted_at")
+
+  wallet          Wallet                @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  cryptoToken     CryptoToken           @relation(fields: [cryptoTokenId], references: [id], onDelete: Cascade)
+  transactions    Transaction[]
+
+  @@map("balance")
+}
+
+model CryptoToken {
+  id              Int                @id @default(autoincrement())
+  symbol          String             @unique
+  name            String
+  contractAddress String             @unique @map("contract_address")
+  decimals        Int
+  createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt       DateTime?          @map("deleted_at")
+
+  balances        Balance[]
+
+  @@map("crypto_token")
 }
 
 enum TransactionStatus {
