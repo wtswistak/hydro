@@ -109,7 +109,7 @@ model CryptoToken {
   id              Int                @id @default(autoincrement())
   symbol          String             @unique
   name            String
-  contractAddress String             @unique @map("contract_address")
+  contractAddress String?            @unique @map("contract_address")
   decimals        Int
   createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)

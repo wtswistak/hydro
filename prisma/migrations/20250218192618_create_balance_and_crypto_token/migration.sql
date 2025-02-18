@@ -30,7 +30,7 @@ CREATE TABLE "crypto_token" (
     "id" SERIAL NOT NULL,
     "symbol" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "contract_address" TEXT NOT NULL,
+    "contract_address" TEXT,
     "decimals" INTEGER NOT NULL,
     "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(3) NOT NULL,
