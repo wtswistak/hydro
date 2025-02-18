@@ -39,7 +39,8 @@ model Wallet {
   deletedAt       DateTime? @map("deleted_at")
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  balances Balance[]
+  balances        Balance[]
+  cryptoTokens    WalletCryptoToken[]
 
   @@map("wallet")
 }
@@ -116,8 +117,23 @@ model CryptoToken {
   deletedAt       DateTime?          @map("deleted_at")
 
   balances        Balance[]
+  wallets         WalletCryptoToken[] 
 
   @@map("crypto_token")
+}
+
+model WalletCryptoToken {
+  id             Int         @id @default(autoincrement())
+  walletId       Int         @map("wallet_id")
+  cryptoTokenId  Int         @map("crypto_token_id")
+  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  wallet        Wallet       @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  cryptoToken   CryptoToken  @relation(fields: [cryptoTokenId], references: [id], onDelete: Cascade)
+
+  @@map("wallet_crypto_token")
+  @@unique([walletId, cryptoTokenId])
 }
 
 enum TransactionStatus {
