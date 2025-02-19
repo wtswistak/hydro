@@ -145,8 +145,8 @@ model WalletCryptoToken {
 model Blockchain {
   id              Int        @id @default(autoincrement()) 
   name            String     @unique                      
-  chainId         BigInt     @unique                      
-  nativeSymbol    String                                    
+  chainId         BigInt     @unique @map("chain_id")                      
+  nativeSymbol    String     @map("native_symbol")                               
   createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
 

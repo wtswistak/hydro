@@ -16,8 +16,8 @@ ALTER TABLE "wallet" ADD COLUMN     "blockchain_id" INTEGER NOT NULL;
 CREATE TABLE "blockchain" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
-    "chainId" BIGINT NOT NULL,
-    "nativeSymbol" TEXT NOT NULL,
+    "chain_id" BIGINT NOT NULL,
+    "native_symbol" TEXT NOT NULL,
     "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(3) NOT NULL,
 
@@ -28,7 +28,7 @@ CREATE TABLE "blockchain" (
 CREATE UNIQUE INDEX "blockchain_name_key" ON "blockchain"("name");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "blockchain_chainId_key" ON "blockchain"("chainId");
+CREATE UNIQUE INDEX "blockchain_chain_id_key" ON "blockchain"("chain_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "balance_wallet_id_cryptoToken_id_key" ON "balance"("wallet_id", "cryptoToken_id");
