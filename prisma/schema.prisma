@@ -34,6 +34,7 @@ model Wallet {
   userId          Int      @map("user_id")
   address         String   @unique
   privateKey      String   @map("private_key")
+  blockchainId    Int      @map("blockchain_id")
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt       DateTime? @map("deleted_at")
@@ -41,6 +42,8 @@ model Wallet {
 
   balances        Balance[]
   cryptoTokens    WalletCryptoToken[]
+
+  blockchain      Blockchain @relation(fields: [blockchainId], references: [id], onDelete: Cascade)
 
   @@map("wallet")
 }
@@ -104,6 +107,7 @@ model Balance {
   transactions    Transaction[]
 
   @@map("balance")
+  @@unique([walletId, cryptoTokenId])
 }
 
 model CryptoToken {
@@ -111,6 +115,7 @@ model CryptoToken {
   symbol          String             @unique
   name            String
   contractAddress String?            @unique @map("contract_address")
+  blockchainId    Int                @map("blockchain_id")
   decimals        Int
   createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
@@ -118,6 +123,7 @@ model CryptoToken {
 
   balances        Balance[]
   wallets         WalletCryptoToken[] 
+  blockchain      Blockchain         @relation(fields: [blockchainId], references: [id], onDelete: Cascade)
 
   @@map("crypto_token")
 }
@@ -134,6 +140,20 @@ model WalletCryptoToken {
 
   @@map("wallet_crypto_token")
   @@unique([walletId, cryptoTokenId])
+}
+
+model Blockchain {
+  id              Int        @id @default(autoincrement()) 
+  name            String     @unique                      
+  chainId         BigInt     @unique                      
+  nativeSymbol    String                                    
+  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  wallets        Wallet[]
+  cryptoTokens   CryptoToken[]
+
+  @@map("blockchain")
 }
 
 enum TransactionStatus {
