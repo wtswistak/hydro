@@ -4,6 +4,9 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CryptoService } from './crypto.service';
 import { Wallet } from '@prisma/client';
 import { WalletExistsException } from './exception/wallet-exist.exception';
+import { CreateWalletDto } from './dto/create-wallet.dto';
+import { CreateTxDto } from './dto/create-tx.dto';
+import { ChainNotExistsException } from './exception/chain-not-exists.exception';
 
 @Injectable()
 export class WalletService {
@@ -14,28 +17,56 @@ export class WalletService {
     private cryptoService: CryptoService,
   ) {}
 
-  async createWallet({ userId }: { userId: number }): Promise<Wallet> {
+  async createWallet({
+    userId,
+    blockchain,
+  }: { userId: number } & CreateWalletDto): Promise<Wallet> {
     this.logger.log(`Checking if wallet exists for user with id: ${userId}`);
     const existingWallet = await this.getWalletByUserId({ userId });
     if (existingWallet) {
       throw new WalletExistsException();
     }
 
+    const chain = await this.prisma.blockchain.findUnique({
+      where: { name: blockchain },
+    });
+    if (!chain) {
+      throw new ChainNotExistsException();
+    }
     this.logger.log(`Creating wallet for user with id: ${userId}`);
     const blockchainWallet = this.blockchainService.createWallet();
-    const encryptedPrivateKey = this.cryptoService.encrypt({
+    const encryptedKey = this.cryptoService.encrypt({
       privateKey: blockchainWallet.privateKey,
     });
-    const wallet = await this.prisma.wallet.create({
-      data: {
-        userId,
-        address: blockchainWallet.address,
-        privateKey: encryptedPrivateKey,
-      },
-    });
-    this.logger.log(`Created wallet for user with id: ${userId}`);
 
-    return wallet;
+    const newWallet = await this.prisma.$transaction(async (prisma) => {
+      const wallet = await this.prisma.wallet.create({
+        data: {
+          address: blockchainWallet.address,
+          privateKey: encryptedKey,
+          blockchainId: chain.id,
+          userId,
+        },
+      });
+      this.logger.log(`Wallet created with id: ${wallet.id}`);
+      const cryptoTokens = await prisma.cryptoToken.findMany({
+        where: { blockchainId: chain.id },
+      });
+
+      this.logger.log(`Creating balance for wallet with id: ${wallet.id}`);
+      await this.prisma.balance.createMany({
+        data: cryptoTokens.map((token) => ({
+          walletId: wallet.id,
+          cryptoTokenId: token.id,
+          amount: 0,
+        })),
+      });
+      this.logger.log(`Balances created for wallet with id: ${wallet.id}`);
+
+      return wallet;
+    });
+
+    return newWallet;
   }
 
   getWalletByUserId({ userId }: { userId: number }): Promise<Wallet> {
@@ -55,7 +86,11 @@ export class WalletService {
     return balance;
   }
 
-  async createTransaction({ userId, receiverAddress, amount }) {
+  async createTransaction({
+    userId,
+    receiverAddress,
+    amount,
+  }: { userId: number } & CreateTxDto) {
     this.logger.log(
       `Creating transaction for user with id: ${userId}, receiverAddress: ${receiverAddress}, amount: ${amount}`,
     );
