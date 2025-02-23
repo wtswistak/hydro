@@ -8,7 +8,7 @@ export async function seedBlockchain() {
   logger.log('Seeding Blokchain...');
   await prisma.blockchain.create({
     data: {
-      name: 'Ethereum',
+      name: 'Etherum',
       chainId: 1,
       nativeSymbol: 'ETH',
     },

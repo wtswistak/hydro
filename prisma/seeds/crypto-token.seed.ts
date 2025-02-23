@@ -12,7 +12,7 @@ export async function seedCryptoToken() {
   });
   await prisma.cryptoToken.create({
     data: {
-      name: 'Ethereum',
+      name: 'Etherum',
       symbol: 'ETH',
       decimals: 8,
       blockchainId: blockchain.id,
