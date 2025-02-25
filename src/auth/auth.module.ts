@@ -18,5 +18,6 @@ import { NotificationModule } from 'src/notification/notification.module';
   ],
   providers: [AuthService, JwtStrategy, AppConfigService],
   controllers: [AuthController],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

@@ -5,6 +5,7 @@ import {
   Patch,
   Post,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -16,6 +17,7 @@ import { RegisterResponseDto } from './dto/register-response.dto';
 import { plainToClass } from 'class-transformer';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -31,11 +33,18 @@ export class AuthController {
   }
 
   @Post('login')
-  login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
-    return this.authService.login(loginDto);
+  async login(@Body() loginDto: LoginDto, @Res() res: Response) {
+    const tokens = await this.authService.login(loginDto);
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.json(tokens);
   }
 
-  @Post('refresh-token')
+  @Post('refresh')
   @UseGuards(AuthGuard('jwt'))
   refreshToken(@Req() req: any) {
     const userId = req.user.id;

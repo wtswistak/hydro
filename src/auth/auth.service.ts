@@ -22,10 +22,12 @@ interface TokenPayload {
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
+  private static readonly TOKEN_EXPIRES_TIME = 7 * 24 * 60 * 60 * 1000;
+
   constructor(
-    private prisma: PrismaService,
+    private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
-    private notificationService: NotificationService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   private async generateTokens(payload: TokenPayload) {
@@ -105,6 +107,8 @@ export class AuthService {
       sub: user.id,
       email: user.email,
     });
+
+    await this.createToken({ userId: user.id, token: tokens.refreshToken });
     this.logger.log(`User logged in: ${user.id}`);
 
     return tokens;
@@ -167,7 +171,7 @@ export class AuthService {
       where: { id: storedToken.id },
       data: {
         token: tokens.refreshToken,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        expiresAt: new Date(Date.now() + AuthService.TOKEN_EXPIRES_TIME),
       },
     });
 
@@ -214,5 +218,15 @@ export class AuthService {
       return user;
     });
     this.logger.log(`Email verified for user: ${result.id}`);
+  }
+
+  createToken({ userId, token }: { userId: number; token: string }) {
+    return this.prisma.token.create({
+      data: {
+        token,
+        userId,
+        expiresAt: new Date(Date.now() + AuthService.TOKEN_EXPIRES_TIME),
+      },
+    });
   }
 }
