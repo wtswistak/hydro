@@ -13,6 +13,7 @@ import { AppConfigService } from 'src/config/app-config.service';
         timeout: configService.httpTimeout,
         maxRedirects: configService.maxRedirects,
       }),
+      inject: [AppConfigService],
     }),
   ],
   providers: [BinanceService],
