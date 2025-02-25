@@ -6,11 +6,6 @@ import { SendTransactionDto } from './dto/send-transaction.dto';
 export class BlockchainController {
   constructor(private readonly blockchainService: BlockchainService) {}
 
-  @Get()
-  getBlockNumber() {
-    return this.blockchainService.getBlockNumber();
-  }
-
   @Post('send-transaction-by-wallet')
   sendTransactionByPrivateWallet(
     @Body() sendTransactionDto: SendTransactionDto,
@@ -19,9 +14,14 @@ export class BlockchainController {
       sendTransactionDto,
     );
   }
-
+  // for dev
   @Post('create-wallet')
   createWallet() {
     return this.blockchainService.createWallet();
+  }
+  // for dev
+  @Get()
+  getBlockNumber() {
+    return this.blockchainService.getBlockNumber();
   }
 }
