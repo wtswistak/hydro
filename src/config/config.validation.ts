@@ -12,4 +12,9 @@ export const validationSchema = Joi.object({
   HTTP_TIMEOUT: Joi.number().default(5000),
   MAX_REDIRECTS: Joi.number().default(5),
   COINGECKO_API_URL: Joi.string().required(),
+  ETH_NODE_URL: Joi.string().required(),
+  PRIVATE_KEY: Joi.string().required(),
+  CRYPTO_KEY: Joi.string().required(),
+  REFRESH_TOKEN: Joi.string().required(),
+  ACCESS_TOKEN: Joi.string().required(),
 });

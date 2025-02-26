@@ -12,7 +12,7 @@ import { NotificationModule } from 'src/notification/notification.module';
     PassportModule,
     NotificationModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET,
+      secret: process.env.ACCESS_TOKEN,
       signOptions: { expiresIn: '1d' },
     }),
   ],

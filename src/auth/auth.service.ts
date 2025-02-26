@@ -13,6 +13,7 @@ import { User } from '@prisma/client';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { NotificationService } from 'src/notification/notification.service';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { AppConfigService } from 'src/config/app-config.service';
 
 interface TokenPayload {
   sub: number;
@@ -28,16 +29,17 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly notificationService: NotificationService,
+    private readonly configService: AppConfigService,
   ) {}
 
   private async generateTokens(payload: TokenPayload) {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        secret: process.env.ACCESS_TOKEN_SECRET,
+        secret: this.configService.accessToken,
         expiresIn: '15m',
       }),
       this.jwtService.signAsync(payload, {
-        secret: process.env.REFRESH_TOKEN_SECRET,
+        secret: this.configService.refreshToken,
         expiresIn: '7d',
       }),
     ]);
@@ -147,7 +149,7 @@ export class AuthService {
     const payload = await this.jwtService.verifyAsync<TokenPayload>(
       refreshToken,
       {
-        secret: process.env.REFRESH_TOKEN_SECRET,
+        secret: this.configService.refreshToken,
       },
     );
     const storedToken = await this.prisma.token.findUnique({

@@ -44,4 +44,10 @@ export class AppConfigService {
   get cryptoKey(): string {
     return this.configService.get<string>('CRYPTO_KEY');
   }
+  get refreshToken(): string {
+    return this.configService.get<string>('REFRESH_TOKEN');
+  }
+  get accessToken(): string {
+    return this.configService.get<string>('ACCESS_TOKEN');
+  }
 }
