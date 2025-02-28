@@ -20,6 +20,11 @@ interface TokenPayload {
   email: string;
 }
 
+interface CreateToken {
+  userId: number;
+  token: string;
+}
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -180,7 +185,13 @@ export class AuthService {
     return tokens;
   }
 
-  logout(refreshToken: string) {
+  async logout(refreshToken: string) {
+    const token = await this.prisma.token.findUnique({
+      where: { token: refreshToken },
+    });
+    if (!token) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
     this.prisma.token.update({
       where: { token: refreshToken },
       data: {
@@ -222,7 +233,7 @@ export class AuthService {
     this.logger.log(`Email verified for user: ${result.id}`);
   }
 
-  createToken({ userId, token }: { userId: number; token: string }) {
+  createToken({ userId, token }: CreateToken) {
     return this.prisma.token.create({
       data: {
         token,
