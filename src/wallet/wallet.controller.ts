@@ -1,16 +1,16 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { WalletService } from './wallet.service';
-import { AuthGuard } from '@nestjs/passport';
 import { Wallet } from '@prisma/client';
 import { CreateTxDto } from './dto/create-tx.dto';
 import { CreateWalletDto } from './dto/create-wallet.dto';
+import { JwtRefreshGuard } from 'src/middleware/jwt-refresh.guard';
 
 @Controller('wallet')
 export class WalletController {
   constructor(private readonly walletService: WalletService) {}
 
   @Post()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtRefreshGuard)
   createWallet(
     @Req() req: any,
     @Body() { blockchain }: CreateWalletDto,
@@ -20,14 +20,14 @@ export class WalletController {
   }
 
   @Get('balance')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtRefreshGuard)
   getBalance(@Req() req: any): Promise<string> {
     const userId = req.user.id;
     return this.walletService.getBalance({ userId });
   }
 
   @Post('transaction')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtRefreshGuard)
   createTransaction(@Req() req: any, @Body() createTxDto: CreateTxDto) {
     const userId = req.user.id;
     return this.walletService.createTransaction({

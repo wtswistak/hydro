@@ -18,6 +18,7 @@ import { plainToClass } from 'class-transformer';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { Response } from 'express';
+import { JwtRefreshGuard } from 'src/middleware/jwt-refresh.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -45,14 +46,14 @@ export class AuthController {
   }
 
   @Post('refresh')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtRefreshGuard)
   refreshToken(@Req() req: any) {
     const userId = req.user.id;
     return this.authService.refreshToken(userId);
   }
 
   @Patch('change-password')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtRefreshGuard)
   @HttpCode(204)
   changePassword(
     @Body() changePasswordDto: ChangePasswordDto,
@@ -63,7 +64,7 @@ export class AuthController {
   }
 
   @Post('logout')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtRefreshGuard)
   logout(@Req() req: any) {
     const refreshToken = req.cookies.refreshToken;
 
