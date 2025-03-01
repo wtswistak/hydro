@@ -4,6 +4,7 @@ import { Wallet } from '@prisma/client';
 import { CreateTxDto } from './dto/create-tx.dto';
 import { CreateWalletDto } from './dto/create-wallet.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { AuthRequest } from 'src/utils/interface';
 
 @Controller('wallet')
 export class WalletController {
@@ -12,7 +13,7 @@ export class WalletController {
   @Post()
   @UseGuards(AuthGuard('jwt'))
   createWallet(
-    @Req() req: any,
+    @Req() req: AuthRequest,
     @Body() { blockchain }: CreateWalletDto,
   ): Promise<Wallet> {
     const userId = req.user.id;
@@ -21,14 +22,14 @@ export class WalletController {
 
   @Get('balance')
   @UseGuards(AuthGuard('jwt'))
-  getBalance(@Req() req: any): Promise<string> {
+  getBalance(@Req() req: AuthRequest): Promise<string> {
     const userId = req.user.id;
     return this.walletService.getBalance({ userId });
   }
 
   @Post('transaction')
   @UseGuards(AuthGuard('jwt'))
-  createTransaction(@Req() req: any, @Body() createTxDto: CreateTxDto) {
+  createTransaction(@Req() req: AuthRequest, @Body() createTxDto: CreateTxDto) {
     const userId = req.user.id;
     return this.walletService.createTransaction({
       userId,

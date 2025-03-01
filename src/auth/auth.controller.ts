@@ -19,6 +19,7 @@ import { LoginResponseDto } from './dto/login-response.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { Response } from 'express';
 import { REFRESH_TOKEN_EXPIRES_TIME } from 'src/utils/constant';
+import { AuthRequest } from 'src/utils/interface';
 
 @Controller('auth')
 export class AuthController {
@@ -47,7 +48,7 @@ export class AuthController {
 
   @Post('refresh')
   @UseGuards(AuthGuard('jwt-refresh'))
-  async refreshToken(@Req() req: any, @Res() res: Response) {
+  async refreshToken(@Req() req: AuthRequest, @Res() res: Response) {
     const refreshToken = req.user.refreshToken;
     const tokens = await this.authService.refreshToken(refreshToken);
     res.cookie('refreshToken', tokens.refreshToken, {
@@ -64,7 +65,7 @@ export class AuthController {
   @HttpCode(204)
   changePassword(
     @Body() changePasswordDto: ChangePasswordDto,
-    @Req() req: any,
+    @Req() req: AuthRequest,
   ): void {
     const userId = req.user.id;
     this.authService.changePassword(userId, changePasswordDto);
@@ -72,8 +73,8 @@ export class AuthController {
 
   @Post('logout')
   @UseGuards(AuthGuard('jwt'))
-  logout(@Req() req: any) {
-    const refreshToken = req.cookies.refreshToken;
+  logout(@Req() req: AuthRequest) {
+    const refreshToken = req.user.refreshToken;
 
     return this.authService.logout(refreshToken);
   }
