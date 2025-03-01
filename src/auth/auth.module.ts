@@ -5,7 +5,8 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { AppConfigService } from 'src/config/app-config.service';
 import { NotificationModule } from 'src/notification/notification.module';
-import { JwtRefreshGuard } from 'src/middleware/jwt-refresh.guard';
+import { JwtStrategy } from './strategies/jwt-strategy';
+import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 
 @Module({
   imports: [
@@ -13,11 +14,11 @@ import { JwtRefreshGuard } from 'src/middleware/jwt-refresh.guard';
     NotificationModule,
     JwtModule.register({
       secret: process.env.ACCESS_TOKEN,
-      signOptions: { expiresIn: '1d' },
+      signOptions: { expiresIn: '1d' }, // default expiration time for access token
     }),
   ],
-  providers: [AuthService, AppConfigService, JwtRefreshGuard],
+  providers: [AuthService, AppConfigService, JwtStrategy, JwtRefreshStrategy],
   controllers: [AuthController],
-  exports: [AuthService, JwtModule, JwtRefreshGuard, AppConfigService],
+  exports: [AuthService],
 })
 export class AuthModule {}

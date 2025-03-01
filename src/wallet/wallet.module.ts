@@ -7,7 +7,6 @@ import { CryptoService } from './crypto.service';
 import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports: [AuthModule],
   controllers: [WalletController],
   providers: [
     WalletService,

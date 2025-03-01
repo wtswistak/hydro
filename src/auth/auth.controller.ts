@@ -18,7 +18,6 @@ import { plainToClass } from 'class-transformer';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { Response } from 'express';
-import { JwtRefreshGuard } from 'src/middleware/jwt-refresh.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -46,14 +45,21 @@ export class AuthController {
   }
 
   @Post('refresh')
-  @UseGuards(JwtRefreshGuard)
-  refreshToken(@Req() req: any) {
-    const userId = req.user.id;
-    return this.authService.refreshToken(userId);
+  @UseGuards(AuthGuard('jwt-refresh'))
+  async refreshToken(@Req() req: any, @Res() res: Response) {
+    const refreshToken = req.user.refreshToken;
+    const tokens = await this.authService.refreshToken(refreshToken);
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.json(tokens);
   }
 
   @Patch('change-password')
-  @UseGuards(JwtRefreshGuard)
+  @UseGuards(AuthGuard('jwt'))
   @HttpCode(204)
   changePassword(
     @Body() changePasswordDto: ChangePasswordDto,
@@ -64,7 +70,7 @@ export class AuthController {
   }
 
   @Post('logout')
-  @UseGuards(JwtRefreshGuard)
+  @UseGuards(AuthGuard('jwt'))
   logout(@Req() req: any) {
     const refreshToken = req.cookies.refreshToken;
 

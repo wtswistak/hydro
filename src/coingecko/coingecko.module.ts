@@ -8,7 +8,6 @@ import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
-    AuthModule,
     HttpModule.registerAsync({
       imports: [AppConfigModule],
       useFactory: async (configService: AppConfigService) => ({

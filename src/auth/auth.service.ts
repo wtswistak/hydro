@@ -164,7 +164,8 @@ export class AuthService {
     if (
       !storedToken ||
       storedToken.revokedAt ||
-      storedToken.expiresAt < new Date()
+      storedToken.expiresAt < new Date() ||
+      storedToken.userId !== payload.sub
     ) {
       throw new UnauthorizedException('Invalid refresh token');
     }
