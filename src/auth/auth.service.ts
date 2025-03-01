@@ -87,6 +87,7 @@ export class AuthService {
       return newUser;
     });
 
+    this.logger.log(`Sending verification email to ${email}`);
     this.notificationService.sendVerificationEmail({
       email,
       token: verificationToken,
@@ -96,6 +97,7 @@ export class AuthService {
   }
 
   async login({ email, password }: LoginDto): Promise<LoginResponseDto> {
+    this.logger.log(`Logging in user with email: ${email}`);
     const user = await this.prisma.user.findUnique({
       where: {
         email,
@@ -139,6 +141,7 @@ export class AuthService {
       throw new InvalidPasswordException();
     }
     const hashPassword = await bcrypt.hash(newPassword, 10);
+    this.logger.log(`Changing password for user: ${userId}`);
 
     this.prisma.user.update({
       where: {
@@ -174,7 +177,7 @@ export class AuthService {
       sub: payload.sub,
       email: payload.email,
     });
-
+    this.logger.log(`Refreshing token for user: ${payload.sub}`);
     await this.prisma.token.update({
       where: { id: storedToken.id },
       data: {
