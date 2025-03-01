@@ -14,6 +14,7 @@ import { LoginResponseDto } from './dto/login-response.dto';
 import { NotificationService } from 'src/notification/notification.service';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { AppConfigService } from 'src/config/app-config.service';
+import { REFRESH_TOKEN_EXPIRES_TIME } from 'src/utils/constant';
 
 interface TokenPayload {
   sub: number;
@@ -28,7 +29,6 @@ interface CreateToken {
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  private static readonly TOKEN_EXPIRES_TIME = 7 * 24 * 60 * 60 * 1000;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -179,7 +179,7 @@ export class AuthService {
       where: { id: storedToken.id },
       data: {
         token: tokens.refreshToken,
-        expiresAt: new Date(Date.now() + AuthService.TOKEN_EXPIRES_TIME),
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_TIME),
       },
     });
 
@@ -239,7 +239,7 @@ export class AuthService {
       data: {
         token,
         userId,
-        expiresAt: new Date(Date.now() + AuthService.TOKEN_EXPIRES_TIME),
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_TIME),
       },
     });
   }

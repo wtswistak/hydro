@@ -18,6 +18,7 @@ import { plainToClass } from 'class-transformer';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { Response } from 'express';
+import { REFRESH_TOKEN_EXPIRES_TIME } from 'src/utils/constant';
 
 @Controller('auth')
 export class AuthController {
@@ -38,7 +39,7 @@ export class AuthController {
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: REFRESH_TOKEN_EXPIRES_TIME,
     });
 
     res.json(tokens);
@@ -52,7 +53,7 @@ export class AuthController {
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: REFRESH_TOKEN_EXPIRES_TIME,
     });
 
     res.json(tokens);
