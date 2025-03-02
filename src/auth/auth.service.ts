@@ -160,33 +160,44 @@ export class AuthService {
         secret: this.configService.refreshToken,
       },
     );
-    const storedToken = await this.prisma.token.findUnique({
-      where: { token: refreshToken },
-    });
 
-    if (
-      !storedToken ||
-      storedToken.revokedAt ||
-      storedToken.expiresAt < new Date() ||
-      storedToken.userId !== payload.sub
-    ) {
-      throw new UnauthorizedException('Invalid refresh token');
-    }
+    return this.prisma.$transaction(async (tx) => {
+      const storedToken = await tx.token.findUnique({
+        where: { token: refreshToken },
+      });
 
-    const tokens = await this.generateTokens({
-      sub: payload.sub,
-      email: payload.email,
-    });
-    this.logger.log(`Refreshing token for user: ${payload.sub}`);
-    await this.prisma.token.update({
-      where: { id: storedToken.id },
-      data: {
-        token: tokens.refreshToken,
-        expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_TIME),
-      },
-    });
+      if (
+        !storedToken ||
+        storedToken.revokedAt ||
+        storedToken.expiresAt < new Date() ||
+        storedToken.userId !== payload.sub
+      ) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
 
-    return tokens;
+      const tokens = await this.generateTokens({
+        sub: payload.sub,
+        email: payload.email,
+      });
+      this.logger.log(`Refreshing token for user: ${payload.sub}`);
+
+      await tx.token.update({
+        where: { token: refreshToken },
+        data: {
+          revokedAt: new Date(),
+        },
+      });
+
+      await tx.token.create({
+        data: {
+          token: tokens.refreshToken,
+          userId: payload.sub,
+          expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_TIME),
+        },
+      });
+
+      return tokens;
+    });
   }
 
   async logout(refreshToken: string) {
