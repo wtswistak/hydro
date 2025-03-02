@@ -15,16 +15,7 @@ import { NotificationService } from 'src/notification/notification.service';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { AppConfigService } from 'src/config/app-config.service';
 import { REFRESH_TOKEN_EXPIRES_TIME } from 'src/utils/constant';
-
-interface TokenPayload {
-  sub: number;
-  email: string;
-}
-
-interface CreateToken {
-  userId: number;
-  token: string;
-}
+import { CreateToken, JWTTokens, TokenPayload } from './interface';
 
 @Injectable()
 export class AuthService {
@@ -37,7 +28,7 @@ export class AuthService {
     private readonly configService: AppConfigService,
   ) {}
 
-  private async generateTokens(payload: TokenPayload) {
+  private async generateTokens(payload: TokenPayload): Promise<JWTTokens> {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: this.configService.accessToken,
@@ -153,7 +144,7 @@ export class AuthService {
     });
   }
 
-  async refreshToken(refreshToken: string) {
+  async refreshToken(refreshToken: string): Promise<JWTTokens> {
     const payload = await this.jwtService.verifyAsync<TokenPayload>(
       refreshToken,
       {
