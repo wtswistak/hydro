@@ -6,4 +6,7 @@ export class CreateTxDto {
 
   @IsNumber()
   amount: number;
+
+  @IsNumber()
+  balanceId: number;
 }

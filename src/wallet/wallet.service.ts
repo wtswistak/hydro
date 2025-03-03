@@ -7,6 +7,7 @@ import { WalletExistsException } from './exception/wallet-exist.exception';
 import { CreateWalletDto } from './dto/create-wallet.dto';
 import { CreateTxDto } from './dto/create-tx.dto';
 import { ChainNotExistsException } from './exception/chain-not-exists.exception';
+import { BalanceNotExistException } from './exception/balance-not-exist.exception';
 
 @Injectable()
 export class WalletService {
@@ -86,24 +87,66 @@ export class WalletService {
     return balance;
   }
 
+  getWalletById({ walletId }: { walletId: number }): Promise<Wallet> {
+    return this.prisma.wallet.findUnique({
+      where: { id: walletId },
+    });
+  }
+
   async createTransaction({
     userId,
     receiverAddress,
+    balanceId,
     amount,
   }: { userId: number } & CreateTxDto) {
     this.logger.log(
       `Creating transaction for user with id: ${userId}, receiverAddress: ${receiverAddress}, amount: ${amount}`,
     );
-    const wallet = await this.getWalletByUserId({ userId });
-    const decryptedPrivateKey = this.cryptoService.decrypt({
-      encryptedKey: wallet.privateKey,
+    const prismaTx = this.prisma.$transaction(async (prismaTx) => {
+      const balance = await prismaTx.balance.findUnique({
+        where: { id: balanceId },
+      });
+      if (!balance) {
+        throw new BalanceNotExistException();
+      }
+      const wallet = await prismaTx.wallet.findUnique({
+        where: { id: balance.walletId },
+      });
+      const decryptedPrivateKey = this.cryptoService.decrypt({
+        encryptedKey: wallet.privateKey,
+      });
+      const blockchainTx = await this.blockchainService.sendTransaction({
+        receiverAddress,
+        amount,
+        privateKey: decryptedPrivateKey,
+      });
+      this.logger.log(
+        `Transaction created in blockchain with hash: ${blockchainTx.hash}`,
+      );
+      const newBalance = await prismaTx.balance.update({
+        where: { id: balanceId },
+        data: {
+          amount: {
+            decrement: amount,
+          },
+        },
+      });
+      this.logger.log(
+        `Balance updated id: ${newBalance.id}, new amount: ${newBalance.amount}`,
+      );
+      const tx = await prismaTx.transaction.create({
+        data: {
+          amount,
+          receiverAddress,
+          status: 'PENDING',
+          hash: blockchainTx.hash,
+          chainId: wallet.blockchainId,
+          balanceId,
+        },
+      });
+      this.logger.log(`Transaction created with id: ${tx.id}`);
+      return blockchainTx;
     });
-    const transaction = await this.blockchainService.sendTransaction({
-      receiverAddress,
-      amount,
-      privateKey: decryptedPrivateKey,
-    });
-
-    return transaction;
+    return prismaTx;
   }
 }
