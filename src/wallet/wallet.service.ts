@@ -86,6 +86,19 @@ export class WalletService {
 
     return balance;
   }
+  async getBalances({ userId }: { userId: number }): Promise<Wallet[]> {
+    const balances = await this.prisma.wallet.findMany({
+      where: { userId },
+      include: {
+        balances: {
+          include: {
+            cryptoToken: true,
+          },
+        },
+      },
+    });
+    return balances;
+  }
 
   getWalletById({ walletId }: { walletId: number }): Promise<Wallet> {
     return this.prisma.wallet.findUnique({
