@@ -22,7 +22,7 @@ model User {
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tokens Token[]
+  sessionTokens SessionToken[]
   emailVerifications EmailVerification[]
   wallets Wallet[]
 
@@ -30,25 +30,23 @@ model User {
 }
 
 model Wallet {
-  id              Int      @id @default(autoincrement())
-  userId          Int      @map("user_id")
-  address         String   @unique
-  privateKey      String   @map("private_key")
-  blockchainId    Int      @map("blockchain_id")
-  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  id              Int       @id @default(autoincrement())
+  userId          Int       @map("user_id")
+  address         String    @unique
+  privateKey      String    @map("private_key")
+  blockchainId    Int       @map("blockchain_id")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt       DateTime? @map("deleted_at")
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  balances        Balance[]
-  cryptoTokens    WalletCryptoToken[]
-
+  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   blockchain      Blockchain @relation(fields: [blockchainId], references: [id], onDelete: Cascade)
+  balances        Balance[]
 
   @@map("wallet")
 }
 
-model Token {
+model SessionToken {
   id         Int       @id @default(autoincrement())
   userId     Int       @map("user_id")
   token      String    @unique
@@ -59,7 +57,7 @@ model Token {
 
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("token")
+  @@map("session_token")
 }
 
 model EmailVerification {
@@ -78,36 +76,42 @@ model EmailVerification {
 }
 
 model Transaction {
-  id              Int                   @id @default(autoincrement())
-  balanceId       Int                   @map("balance_id")
-  amount          Decimal
-  status          TransactionStatus     @default(PENDING)
-  receiverAddress String
-  hash            String                @unique
-  chainId         BigInt
-  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
-
-  balance         Balance    @relation(fields: [balanceId], references: [id], onDelete: Cascade)
+  id                Int                   @id @default(autoincrement())
+  amount            Decimal @db.Decimal(36, 18)
+  senderAddress     String                @map("sender_address")
+  receiverAddress   String                @map("receiver_address")
+  senderBalanceId   Int?                  @map("sender_balance_id")
+  receiverBalanceId Int?                  @map("receiver_balance_id")
+  status            TransactionStatus     @default(PENDING)
+  hash              String?               @unique
+  nonce             Int?
+  gasLimit          BigInt?               @map("gas_limit")
+  gasPrice          Decimal?              @map("gas_price")
+  blockNumber       Int?                  @map("block_number")
+  createdAt         DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
+  senderBalance     Balance?              @relation("Sender", fields: [senderBalanceId], references: [id])
+  receiverBalance   Balance?              @relation("Receiver", fields: [receiverBalanceId], references: [id])
 
   @@map("transaction")
 }
 
 model Balance {
-  id              Int                   @id @default(autoincrement())
-  walletId        Int                   @map("wallet_id")
-  amount          Decimal
-  cryptoTokenId   Int                   @map("cryptoToken_id")
-  createdAt       DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt       DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
-  deletedAt       DateTime?             @map("deleted_at")
+  id                  Int                   @id @default(autoincrement())
+  walletId            Int                   @map("wallet_id")
+  cryptoTokenId       Int                   @map("cryptoToken_id")
+  amount              Decimal @db.Decimal(36, 18)       @default(0)
+  createdAt           DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt           DateTime?             @map("deleted_at")
 
-  wallet          Wallet                @relation(fields: [walletId], references: [id], onDelete: Cascade)
-  cryptoToken     CryptoToken           @relation(fields: [cryptoTokenId], references: [id], onDelete: Cascade)
-  transactions    Transaction[]
+  wallet               Wallet               @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  cryptoToken          CryptoToken          @relation(fields: [cryptoTokenId], references: [id], onDelete: Cascade)
+  senderTransactions  Transaction[]         @relation("Sender")
+  receiverTransactions Transaction[]        @relation("Receiver")
 
-  @@map("balance")
   @@unique([walletId, cryptoTokenId])
+  @@map("balance")
 }
 
 model CryptoToken {
@@ -122,24 +126,9 @@ model CryptoToken {
   deletedAt       DateTime?          @map("deleted_at")
 
   balances        Balance[]
-  wallets         WalletCryptoToken[] 
   blockchain      Blockchain         @relation(fields: [blockchainId], references: [id], onDelete: Cascade)
 
   @@map("crypto_token")
-}
-
-model WalletCryptoToken {
-  id             Int         @id @default(autoincrement())
-  walletId       Int         @map("wallet_id")
-  cryptoTokenId  Int         @map("crypto_token_id")
-  createdAt      DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt      DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
-
-  wallet        Wallet       @relation(fields: [walletId], references: [id], onDelete: Cascade)
-  cryptoToken   CryptoToken  @relation(fields: [cryptoTokenId], references: [id], onDelete: Cascade)
-
-  @@map("wallet_crypto_token")
-  @@unique([walletId, cryptoTokenId])
 }
 
 model Blockchain {
@@ -149,6 +138,7 @@ model Blockchain {
   nativeSymbol    String     @map("native_symbol")                               
   createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt       DateTime?  @map("deleted_at")
 
   wallets        Wallet[]
   cryptoTokens   CryptoToken[]
