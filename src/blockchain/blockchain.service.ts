@@ -58,7 +58,7 @@ export class BlockchainService {
       });
       console.log(tx);
 
-      this.logger.log(`Transaction created with hash: ${tx.hash}`);
+      this.logger.log(`Transaction sent to blockchain with hash: ${tx.hash}`);
       return {
         hash: tx.hash,
         blockNumber: tx.blockNumber,

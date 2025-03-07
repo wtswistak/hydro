@@ -146,11 +146,6 @@ export class WalletService {
       const decryptedPrivateKey = this.cryptoService.decrypt({
         encryptedKey: wallet.privateKey,
       });
-      const blockchainTx = await this.blockchainService.sendTransaction({
-        receiverAddress,
-        amount,
-        privateKey: decryptedPrivateKey,
-      });
 
       const newSenderBalance = await prismaTx.balance.update({
         where: { id: balance.id },
@@ -168,14 +163,15 @@ export class WalletService {
         where: { address: receiverAddress },
       });
 
-      const receiverBalance = await prismaTx.balance.findFirst({
-        where: {
-          walletId: receiverWallet.id,
-          cryptoTokenId: cryptoToken.id,
-        },
-      });
+      if (receiverWallet) {
+        this.logger.log(`Receiver wallet found id: ${receiverWallet.id}`);
+        const receiverBalance = await prismaTx.balance.findFirst({
+          where: {
+            walletId: receiverWallet.id,
+            cryptoTokenId: cryptoToken.id,
+          },
+        });
 
-      if (receiverBalance) {
         const newreceiverBalance = await prismaTx.balance.update({
           where: { id: receiverBalance.id },
           data: {
@@ -185,9 +181,14 @@ export class WalletService {
           },
         });
         this.logger.log(
-          `Receiver balance updated id: ${newreceiverBalance.id}, new amount: ${newreceiverBalance.amount}`,
+          `Receiver balance updated, new amount: ${newreceiverBalance.amount}`,
         );
       }
+      const blockchainTx = await this.blockchainService.sendTransaction({
+        receiverAddress,
+        amount,
+        privateKey: decryptedPrivateKey,
+      });
 
       const tx = await prismaTx.transaction.create({
         data: {
