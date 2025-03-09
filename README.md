@@ -97,3 +97,8 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+- gasPrice: Nie używane w EIP-1559. Zamiast pojedynczego gasPrice, transakcje teraz używają dwóch wartości:
+  maxFeePerGas: Maksymalna całkowita opłata za jednostkę gazu, którą jesteś skłonny zapłacić.
+  maxPriorityFeePerGas (tip): Dodatkowa opłata (napiwek) dla górnika, aby przyspieszyć przetwarzanie transakcji.
+  Suma tych dwóch wartości określa maksymalną opłatę, jaką płacisz, ale rzeczywista opłata zależy od aktualnej ceny bazowej gazu (baseFee), która jest spalana przez sieć, oraz opcjonalnego napiwku dla górnika.

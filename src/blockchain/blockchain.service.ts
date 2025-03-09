@@ -49,6 +49,21 @@ export class BlockchainService {
     return this.provider.getBlockNumber();
   }
 
+  /**
+   * @returns
+   *   provider: JsonRpcProvider {}: Dostawca (np. Alchemy, Infura) używany do interakcji z siecią.
+   *   blockNumber: null, blockHash: null: Transakcja jeszcze nie została zatwierdzona, więc te pola są puste.
+   *   hash: '0x7c7a83f0eb0cdecc66686a18e7717d9e28fa6372fb468dae67d4937a95881f76': Unikalny identyfikator transakcji.
+   *   type: 2: Typ transakcji 2 oznacza, że jest to transakcja zgodna z EIP-1559 (typ 0 to starszy format z gasPrice).
+   *   to: '0xCE78F1CE31844D63a839039Ab0D1915a312d4F58', from: '0x6dF4bE74Aeb8d48f740f3396A65175ce9dCD3a21': Adresy odbiorcy i nadawcy.
+   *   nonce: 12: Numer sekwencji transakcji dla nadawcy.
+   *   gasLimit: 21000n: Limit gazu (standardowa wartość dla prostej transakcji ETH).
+   *   gasPrice: undefined: Nie używane w EIP-1559.
+   *   maxPriorityFeePerGas: 1201394n: Napiwek dla górnika (w wei).
+   *   maxFeePerGas: 155169075488n: Maksymalna całkowita opłata za jednostkę gazu (w wei).
+   *   value: 200000000000000n: Wartość transakcji (0.0002 ETH w wei).
+   *   chainId: 11155111n: Identyfikator łańcucha Sepolia.
+   */
   async sendTransaction({ receiverAddress, amount, privateKey }) {
     try {
       const wallet = new ethers.Wallet(privateKey, this.provider);
