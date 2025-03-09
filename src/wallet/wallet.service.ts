@@ -169,7 +169,7 @@ export class WalletService {
       const receiverWallet = await prismaTx.wallet.findUnique({
         where: { address: receiverAddress },
       });
-
+      let receiverBalanceId = null;
       if (receiverWallet) {
         this.logger.log(`Receiver wallet found id: ${receiverWallet.id}`);
         // check if receiver balance exists and update
@@ -191,7 +191,7 @@ export class WalletService {
             amount,
           },
         });
-
+        receiverBalanceId = receiverBalance.id;
         this.logger.log(
           `Receiver balance updated, new amount: ${receiverBalance.amount}`,
         );
@@ -214,6 +214,7 @@ export class WalletService {
           senderAddress: wallet.address,
           hash: blockchainTx.hash,
           senderBalanceId: balance.id,
+          receiverBalanceId: receiverBalanceId,
         },
       });
       this.logger.log(`Transaction created with id: ${tx.id}`);
