@@ -9,6 +9,8 @@ import { CreateTxDto } from './dto/create-tx.dto';
 import { ChainNotExistsException } from './exception/chain-not-exists.exception';
 import { BalanceNotExistException } from './exception/balance-not-exist.exception';
 import { WalletNotExistsException } from './exception/wallet-not-exist.exception';
+import { WalletNotMatchException } from './exception/wallet-not-match.exception';
+import { BalanceAmountTooLowException } from './exception/balance-amount-too-low.exception';
 
 @Injectable()
 export class WalletService {
@@ -120,33 +122,38 @@ export class WalletService {
     receiverAddress,
     cryptoSymbol,
     amount,
+    senderWalletId,
   }: { userId: number } & CreateTxDto) {
     this.logger.log(
-      `Creating transaction for user with id: ${userId}, receiverAddress: ${receiverAddress}, amount: ${amount}`,
+      `Creating transaction for user id: ${userId}, receiverAddress: ${receiverAddress}, amount: ${amount}`,
     );
     const prismaTx = this.prisma.$transaction(async (prismaTx) => {
       const cryptoToken = await prismaTx.cryptoToken.findUnique({
         where: { symbol: cryptoSymbol },
       });
-      const balance = await prismaTx.balance.findFirst({
+      const wallet = await prismaTx.wallet.findUnique({
+        where: { id: senderWalletId },
+      });
+      if (!wallet) {
+        throw new WalletNotExistsException();
+      }
+      if (wallet.userId !== userId) {
+        throw new WalletNotMatchException();
+      }
+      const balance = await prismaTx.balance.findUnique({
         where: {
-          cryptoTokenId: cryptoToken.id,
-          wallet: { userId },
-        },
-        include: {
-          wallet: true,
+          walletId_cryptoTokenId: {
+            walletId: wallet.id,
+            cryptoTokenId: cryptoToken.id,
+          },
         },
       });
       if (!balance) {
         throw new BalanceNotExistException();
       }
-      const wallet = await prismaTx.wallet.findUnique({
-        where: { id: balance.walletId },
-      });
-      const decryptedPrivateKey = this.cryptoService.decrypt({
-        encryptedKey: wallet.privateKey,
-      });
-
+      if (balance.amount < amount) {
+        throw new BalanceAmountTooLowException();
+      }
       const newSenderBalance = await prismaTx.balance.update({
         where: { id: balance.id },
         data: {
@@ -165,25 +172,34 @@ export class WalletService {
 
       if (receiverWallet) {
         this.logger.log(`Receiver wallet found id: ${receiverWallet.id}`);
-        const receiverBalance = await prismaTx.balance.findFirst({
+        // check if receiver balance exists and update
+        const receiverBalance = await prismaTx.balance.upsert({
           where: {
-            walletId: receiverWallet.id,
-            cryptoTokenId: cryptoToken.id,
+            walletId_cryptoTokenId: {
+              walletId: receiverWallet.id,
+              cryptoTokenId: cryptoToken.id,
+            },
           },
-        });
-
-        const newreceiverBalance = await prismaTx.balance.update({
-          where: { id: receiverBalance.id },
-          data: {
+          update: {
             amount: {
               increment: amount,
             },
           },
+          create: {
+            walletId: receiverWallet.id,
+            cryptoTokenId: cryptoToken.id,
+            amount,
+          },
         });
+
         this.logger.log(
-          `Receiver balance updated, new amount: ${newreceiverBalance.amount}`,
+          `Receiver balance updated, new amount: ${receiverBalance.amount}`,
         );
       }
+      const decryptedPrivateKey = this.cryptoService.decrypt({
+        encryptedKey: wallet.privateKey,
+      });
+
       const blockchainTx = await this.blockchainService.sendTransaction({
         receiverAddress,
         amount,
