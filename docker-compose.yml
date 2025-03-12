@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:17
+    image: timescale/timescaledb:latest-pg17
     restart: unless-stopped
     container_name: crypto_db
     environment:
