@@ -153,7 +153,7 @@ export class AuthService {
     );
 
     return this.prisma.$transaction(async (tx) => {
-      const storedToken = await tx.token.findUnique({
+      const storedToken = await tx.sessionToken.findUnique({
         where: { token: refreshToken },
       });
 
@@ -172,14 +172,14 @@ export class AuthService {
       });
       this.logger.log(`Refreshing token for user: ${payload.sub}`);
 
-      await tx.token.update({
+      await tx.sessionToken.update({
         where: { token: refreshToken },
         data: {
           revokedAt: new Date(),
         },
       });
 
-      await tx.token.create({
+      await tx.sessionToken.create({
         data: {
           token: tokens.refreshToken,
           userId: payload.sub,
@@ -192,13 +192,13 @@ export class AuthService {
   }
 
   async logout(refreshToken: string) {
-    const token = await this.prisma.token.findUnique({
+    const token = await this.prisma.sessionToken.findUnique({
       where: { token: refreshToken },
     });
     if (!token) {
       throw new UnauthorizedException('Invalid refresh token');
     }
-    this.prisma.token.update({
+    this.prisma.sessionToken.update({
       where: { token: refreshToken },
       data: {
         revokedAt: new Date(),
@@ -240,7 +240,7 @@ export class AuthService {
   }
 
   createToken({ userId, token }: CreateToken) {
-    return this.prisma.token.create({
+    return this.prisma.sessionToken.create({
       data: {
         token,
         userId,
