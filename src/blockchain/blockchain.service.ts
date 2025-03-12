@@ -80,6 +80,8 @@ export class BlockchainService {
         to: tx.to,
         from: tx.from,
         value: ethers.formatEther(tx.value),
+        gasLimit: tx.gasLimit.toString(),
+        nonce: tx.nonce,
       };
     } catch (error) {
       this.handleError(error, 'sendTransaction');

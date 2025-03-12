@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CryptoService } from './crypto.service';
-import { Wallet } from '@prisma/client';
+import { Transaction, Wallet } from '@prisma/client';
 import { WalletExistsException } from './exception/wallet-exist.exception';
 import { CreateWalletDto } from './dto/create-wallet.dto';
 import { CreateTxDto } from './dto/create-tx.dto';
@@ -123,7 +123,7 @@ export class WalletService {
     cryptoSymbol,
     amount,
     senderWalletId,
-  }: { userId: number } & CreateTxDto) {
+  }: { userId: number } & CreateTxDto): Promise<Transaction> {
     this.logger.log(
       `Creating transaction for user id: ${userId}, receiverAddress: ${receiverAddress}, amount: ${amount}`,
     );
@@ -218,7 +218,7 @@ export class WalletService {
         },
       });
       this.logger.log(`Transaction created with id: ${tx.id}`);
-      return blockchainTx;
+      return tx;
     });
     return prismaTx;
   }
