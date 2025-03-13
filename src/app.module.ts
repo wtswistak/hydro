@@ -11,6 +11,7 @@ import { BinanceModule } from './binance/binance.module';
 import { CoingeckoModule } from './coingecko/coingecko.module';
 import { BlockchainModule } from './blockchain/blockchain.module';
 import { WalletModule } from './wallet/wallet.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { WalletModule } from './wallet/wallet.module';
     CoingeckoModule,
     BlockchainModule,
     WalletModule,
+    RedisModule.forRootAsync(),
   ],
   controllers: [AppController],
   providers: [AppService, MailersendService],

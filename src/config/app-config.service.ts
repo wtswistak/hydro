@@ -50,4 +50,10 @@ export class AppConfigService {
   get accessToken(): string {
     return this.configService.get<string>('ACCESS_TOKEN');
   }
+  get redisHost(): string {
+    return this.configService.get<string>('REDIS_HOST');
+  }
+  get redisPort(): number {
+    return this.configService.get<number>('REDIS_PORT');
+  }
 }
