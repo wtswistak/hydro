@@ -12,6 +12,7 @@ import { CoingeckoModule } from './coingecko/coingecko.module';
 import { BlockchainModule } from './blockchain/blockchain.module';
 import { WalletModule } from './wallet/wallet.module';
 import { RedisModule } from './redis/redis.module';
+import { BullQueueModule } from './bull-mq/bull-mq.module';
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import { RedisModule } from './redis/redis.module';
     CoingeckoModule,
     BlockchainModule,
     WalletModule,
-    RedisModule.forRootAsync(),
+    RedisModule,
+    BullQueueModule,
   ],
   controllers: [AppController],
   providers: [AppService, MailersendService],
