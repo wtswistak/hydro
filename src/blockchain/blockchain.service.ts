@@ -29,22 +29,6 @@ export class BlockchainService {
     return ethers.Wallet.createRandom();
   }
 
-  async sendTransactionByPrivateWallet({ to, amount }: SendTransactionDto) {
-    try {
-      const trx = {
-        to,
-        value: ethers.parseEther(amount.toString()),
-        gasLimit: ethers.hexlify('0x5208'),
-        gasPrice: (await this.provider.getFeeData()).gasPrice,
-      };
-      const transaction = await this.privateWallet.sendTransaction(trx);
-
-      return transaction;
-    } catch (error) {
-      this.handleError(error, 'sendTransactionByPrivateWallet');
-    }
-  }
-
   getBlockNumber(): Promise<number> {
     return this.provider.getBlockNumber();
   }
@@ -95,6 +79,23 @@ export class BlockchainService {
       return ethers.formatEther(balance);
     } catch (error) {
       this.handleError(error, 'getBalance');
+    }
+  }
+
+  // only for test dev
+  async sendTransactionByPrivateWallet({ to, amount }: SendTransactionDto) {
+    try {
+      const trx = {
+        to,
+        value: ethers.parseEther(amount.toString()),
+        gasLimit: ethers.hexlify('0x5208'),
+        gasPrice: (await this.provider.getFeeData()).gasPrice,
+      };
+      const transaction = await this.privateWallet.sendTransaction(trx);
+
+      return transaction;
+    } catch (error) {
+      this.handleError(error, 'sendTransactionByPrivateWallet');
     }
   }
 }
