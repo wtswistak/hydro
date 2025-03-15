@@ -33,6 +33,17 @@ export class BlockchainService {
     return this.provider.getBlockNumber();
   }
 
+  async getTransactionReceipt({ txHash }: { txHash: string }) {
+    try {
+      const receipt = await this.provider.getTransactionReceipt(txHash);
+
+      return receipt;
+    } catch (error) {
+      console.log(error);
+      this.handleError(error, 'getTransactionReceipt');
+    }
+  }
+
   /**
    * @returns
    *   provider: JsonRpcProvider {}: Dostawca (np. Alchemy, Infura) używany do interakcji z siecią.

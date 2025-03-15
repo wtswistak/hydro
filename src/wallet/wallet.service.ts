@@ -222,4 +222,19 @@ export class WalletService {
     });
     return prismaTx;
   }
+
+  updateTxStatus({
+    txId,
+    status,
+  }: {
+    txId: number;
+    status: TransactionStatus;
+  }) {
+    return this.prisma.transaction.update({
+      where: { id: txId },
+      data: {
+        status,
+      },
+    });
+  }
 }
