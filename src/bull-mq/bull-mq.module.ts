@@ -20,5 +20,6 @@ import { AppConfigService } from 'src/config/app-config.service';
       name: 'transaction',
     }),
   ],
+  exports: [BullModule],
 })
 export class BullQueueModule {}

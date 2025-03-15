@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CryptoService } from './crypto.service';
-import { Transaction, Wallet } from '@prisma/client';
+import { Transaction, TransactionStatus, Wallet } from '@prisma/client';
 import { WalletExistsException } from './exception/wallet-exist.exception';
 import { CreateWalletDto } from './dto/create-wallet.dto';
 import { CreateTxDto } from './dto/create-tx.dto';
@@ -11,6 +11,8 @@ import { BalanceNotExistException } from './exception/balance-not-exist.exceptio
 import { WalletNotExistsException } from './exception/wallet-not-exist.exception';
 import { WalletNotMatchException } from './exception/wallet-not-match.exception';
 import { BalanceAmountTooLowException } from './exception/balance-amount-too-low.exception';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class WalletService {
@@ -19,6 +21,7 @@ export class WalletService {
     private prisma: PrismaService,
     private blockchainService: BlockchainService,
     private cryptoService: CryptoService,
+    @InjectQueue('transaction') private readonly transactionQueue: Queue,
   ) {}
 
   async createWallet({
@@ -218,6 +221,22 @@ export class WalletService {
         },
       });
       this.logger.log(`Transaction created with id: ${tx.id}`);
+
+      await this.transactionQueue.add(
+        'transaction',
+        {
+          txId: tx.id,
+          txHash: tx.hash,
+        },
+        {
+          attempts: 10,
+          backoff: {
+            type: 'exponential',
+            delay: 5000,
+          },
+        },
+      );
+
       return tx;
     });
     return prismaTx;
