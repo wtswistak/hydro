@@ -9,11 +9,15 @@ import { HttpExceptionFilter } from './exception/http-exceptions.filter';
 import { AppConfigService } from './config/app-config.service';
 import { ApiKeyGuard } from './middleware/api-key.guard';
 import * as cookieParser from 'cookie-parser';
+import { BigIntInterceptor } from './common/big-int.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(app.get(Reflector)),
+    new BigIntInterceptor(),
+  );
   const configService = app.get(AppConfigService);
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.useGlobalFilters(new HttpExceptionFilter());
