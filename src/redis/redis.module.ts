@@ -1,4 +1,4 @@
-import { Global, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import Redis, { RedisOptions } from 'ioredis';
 import { AppConfigModule } from 'src/config/app-config.module';
 import { AppConfigService } from 'src/config/app-config.service';

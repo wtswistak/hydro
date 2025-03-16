@@ -14,14 +14,13 @@ export class TransactionWorker extends WorkerHost {
   ) {
     super();
   }
-  // refactor method
+
   async process(job: Job<any, any, string>): Promise<any> {
     try {
       const { txHash, txId } = job.data;
       this.logger.log(
         `Processing transaction check for txHash: ${txHash}, txId: ${txId}`,
       );
-
       const receipt = await this.blockchainService.getTransactionReceipt({
         txHash,
       });
@@ -30,38 +29,25 @@ export class TransactionWorker extends WorkerHost {
         this.logger.log(
           `No receipt found for transaction ${txHash}, retrying...`,
         );
-
-        const attemptsMade = job.attemptsMade;
-        if (attemptsMade < 5) {
-          throw new Error('Transaction not confirmed yet');
-        } else {
-          await this.walletService.updateTxStatus({
-            txId,
-            status: TransactionStatus.FAIL,
-          });
-          this.logger.log(
-            `Transaction ${txHash} marked as FAILED after ${attemptsMade} attempts`,
-          );
-          return { success: false, status: TransactionStatus.FAIL };
-        }
+        throw new Error('Transaction not confirmed yet');
       }
-
-      let status: TransactionStatus;
-
-      if (receipt.status === 1) {
+      let status = null;
+      if (receipt && receipt.status === 1) {
         status = TransactionStatus.SUCCESS;
+        this.logger.log(`Transaction ${txHash} updated with status: SUCCESS`);
+
+        return { success: true, status: TransactionStatus.SUCCESS };
       } else {
         status = TransactionStatus.FAIL;
+        this.logger.log(
+          `Transaction ${txHash} updated with status: FAIL, status from blockchain: ${receipt.status}`,
+        );
       }
 
       await this.walletService.updateTxStatus({
         txId,
         status,
       });
-
-      this.logger.log(`Transaction ${txHash} updated with status: ${status}`);
-
-      return { success: true, status };
     } catch (error) {
       this.logger.error(`Error processing transaction check: ${error.message}`);
       throw error;
