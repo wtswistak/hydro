@@ -86,7 +86,8 @@ model Transaction {
   hash              String?               @unique
   nonce             Int?
   gasLimit          BigInt?               @map("gas_limit")
-  gasPrice          Decimal?              @map("gas_price")
+  gasPrice          BigInt?               @map("gas_price")
+  gasUsed           BigInt?               @map("gas_Used")
   blockNumber       Int?                  @map("block_number")
   createdAt         DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt         DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
@@ -117,7 +118,7 @@ model Balance {
 model CryptoToken {
   id              Int                @id @default(autoincrement())
   symbol          String             @unique
-  name            String
+  name            String             @unique
   contractAddress String?            @unique @map("contract_address")
   blockchainId    Int                @map("blockchain_id")
   decimals        Int
