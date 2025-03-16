@@ -218,6 +218,8 @@ export class WalletService {
           hash: blockchainTx.hash,
           senderBalanceId: balance.id,
           receiverBalanceId: receiverBalanceId,
+          nonce: blockchainTx.nonce,
+          gasLimit: blockchainTx.gasLimit,
         },
       });
       this.logger.log(`Transaction created with id: ${tx.id}`);
@@ -254,6 +256,13 @@ export class WalletService {
       data: {
         status,
       },
+    });
+  }
+
+  updateTxDetails({ txId, data }: { txId: number; data: any }) {
+    return this.prisma.transaction.update({
+      where: { id: txId },
+      data,
     });
   }
 }

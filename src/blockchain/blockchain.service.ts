@@ -39,7 +39,6 @@ export class BlockchainService {
 
       return receipt;
     } catch (error) {
-      console.log(error);
       this.handleError(error, 'getTransactionReceipt');
     }
   }
@@ -75,7 +74,7 @@ export class BlockchainService {
         to: tx.to,
         from: tx.from,
         value: ethers.formatEther(tx.value),
-        gasLimit: tx.gasLimit.toString(),
+        gasLimit: tx.gasLimit,
         nonce: tx.nonce,
       };
     } catch (error) {

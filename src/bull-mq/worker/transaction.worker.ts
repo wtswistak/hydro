@@ -31,12 +31,11 @@ export class TransactionWorker extends WorkerHost {
         );
         throw new Error('Transaction not confirmed yet');
       }
+
       let status = null;
       if (receipt && receipt.status === 1) {
         status = TransactionStatus.SUCCESS;
         this.logger.log(`Transaction ${txHash} updated with status: SUCCESS`);
-
-        return { success: true, status: TransactionStatus.SUCCESS };
       } else {
         status = TransactionStatus.FAIL;
         this.logger.log(
@@ -44,12 +43,26 @@ export class TransactionWorker extends WorkerHost {
         );
       }
 
-      await this.walletService.updateTxStatus({
+      await this.walletService.updateTxDetails({
         txId,
-        status,
+        data: {
+          status,
+          blockNumber: receipt.blockNumber,
+          gasUsed: receipt.gasUsed,
+          gasPrice: receipt.gasPrice,
+        },
       });
+
+      return {
+        success: status === TransactionStatus.SUCCESS,
+        status,
+      };
     } catch (error) {
-      this.logger.error(`Error processing transaction check: ${error.message}`);
+      this.logger.error(`Error processing transaction check:`, {
+        message: error.message,
+        stack: error.stack,
+        job: job.data,
+      });
       throw error;
     }
   }

@@ -1,5 +1,5 @@
 import { BullModule } from '@nestjs/bullmq';
-import { Global, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppConfigModule } from 'src/config/app-config.module';
 import { AppConfigService } from 'src/config/app-config.service';
 
