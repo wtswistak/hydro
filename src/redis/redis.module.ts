@@ -3,7 +3,6 @@ import Redis, { RedisOptions } from 'ioredis';
 import { AppConfigModule } from 'src/config/app-config.module';
 import { AppConfigService } from 'src/config/app-config.service';
 
-@Global()
 @Module({
   imports: [AppConfigModule],
   providers: [
