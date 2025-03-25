@@ -1,5 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { BlockchainService } from 'src/blockchain/blockchain.service';
+import {
+  BlockchainService,
+  EstimatedFee,
+} from 'src/blockchain/blockchain.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CryptoService } from './crypto.service';
 import { Transaction, TransactionStatus, Wallet } from '@prisma/client';
@@ -13,6 +16,7 @@ import { WalletNotMatchException } from './exception/wallet-not-match.exception'
 import { BalanceAmountTooLowException } from './exception/balance-amount-too-low.exception';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import { GetEstimatedFeeDto } from './dto/get-estimated-fee.dto';
 
 @Injectable()
 export class WalletService {
@@ -264,5 +268,18 @@ export class WalletService {
       where: { id: txId },
       data,
     });
+  }
+
+  async getEstimatedFee({
+    receiverAddress,
+    amount,
+  }: GetEstimatedFeeDto): Promise<EstimatedFee> {
+    const estimatedFee = await this.blockchainService.estimateFee({
+      receiverAddress,
+      amount,
+    });
+    this.logger.log(`Estimated fee: ${estimatedFee}`);
+
+    return estimatedFee;
   }
 }

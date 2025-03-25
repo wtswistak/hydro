@@ -1,10 +1,20 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { Transaction, Wallet } from '@prisma/client';
 import { CreateTxDto } from './dto/create-tx.dto';
 import { CreateWalletDto } from './dto/create-wallet.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthRequest } from 'src/utils/interface';
+import { GetEstimatedFeeDto } from './dto/get-estimated-fee.dto';
+import { EstimatedFee } from 'src/blockchain/blockchain.service';
 
 @Controller('wallet')
 export class WalletController {
@@ -37,6 +47,16 @@ export class WalletController {
     return this.walletService.createTransaction({
       userId,
       ...createTxDto,
+    });
+  }
+
+  @Get('fee/estimated')
+  @UseGuards(AuthGuard('jwt'))
+  getEstimatedFee(
+    @Query() EstimatedFeeDto: GetEstimatedFeeDto,
+  ): Promise<EstimatedFee> {
+    return this.walletService.getEstimatedFee({
+      ...EstimatedFeeDto,
     });
   }
 }

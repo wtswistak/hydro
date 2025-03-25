@@ -2,6 +2,13 @@ import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { ethers, JsonRpcProvider } from 'ethers';
 import { AppConfigService } from 'src/config/app-config.service';
 import { SendTransactionDto } from './dto/send-transaction.dto';
+import { GetEstimatedFeeDto } from 'src/wallet/dto/get-estimated-fee.dto';
+
+export interface EstimatedFee {
+  estimatedGas: string;
+  gasPrice: string;
+  feeInEth: string;
+}
 
 @Injectable()
 export class BlockchainService {
@@ -106,6 +113,30 @@ export class BlockchainService {
       return transaction;
     } catch (error) {
       this.handleError(error, 'sendTransactionByPrivateWallet');
+    }
+  }
+
+  async estimateFee({
+    receiverAddress,
+    amount,
+  }: GetEstimatedFeeDto): Promise<EstimatedFee> {
+    try {
+      const estimatedGas = await this.provider.estimateGas({
+        to: receiverAddress,
+        value: ethers.parseEther(amount.toString()),
+      });
+      const gasPrice = (await this.provider.getFeeData()).gasPrice;
+
+      const feeInWei = estimatedGas * BigInt(gasPrice);
+      const feeInEth = ethers.formatEther(feeInWei);
+
+      return {
+        estimatedGas: estimatedGas.toString(),
+        gasPrice: gasPrice.toString(),
+        feeInEth,
+      };
+    } catch (error) {
+      this.handleError(error, 'estimateFee');
     }
   }
 }
