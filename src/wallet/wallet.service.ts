@@ -212,7 +212,7 @@ export class WalletService {
       const tx = await prismaTx.transaction.create({
         data: {
           amount,
-          status: 'PENDING',
+          status: TransactionStatus.PENDING,
           receiverAddress,
           senderAddress: wallet.address,
           hash: blockchainTx.hash,
