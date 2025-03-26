@@ -87,7 +87,9 @@ model Transaction {
   nonce             Int?
   gasLimit          BigInt?               @map("gas_limit")
   gasPrice          BigInt?               @map("gas_price")
-  gasUsed           BigInt?               @map("gas_Used")
+  gasUsed           BigInt?               @map("gas_used")
+  cryptoFee         BigInt?               @map("crypto_fee")
+  fiatFee           Int?                  @map("fiat_fee")
   blockNumber       Int?                  @map("block_number")
   createdAt         DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt         DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
