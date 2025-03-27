@@ -5,6 +5,7 @@ import { MarketChartDto } from './dto/market-chart.dto';
 import { MarketChart } from './interface/market-chart-response';
 import { Cryptocurrency } from './interface/cryptocurrency.interface';
 import { convertKeysToCamel } from 'src/utils/convert-to-camel';
+import { FIAT_CURRENCY } from 'src/common/constant';
 
 @Injectable()
 export class CoingeckoService {
@@ -50,6 +51,21 @@ export class CoingeckoService {
       return formatData;
     } catch (error) {
       this.handleError(error, 'getMarketChart');
+    }
+  }
+
+  async getCryptocurrencyRate({ id }: { id: string }): Promise<number> {
+    try {
+      const { data } = await firstValueFrom(
+        this.httpService.get(
+          `simple/price?ids=${id}&vs_currencies=${FIAT_CURRENCY}`,
+        ),
+      );
+      const rate = data[id].usd;
+
+      return rate;
+    } catch (error) {
+      this.handleError(error, 'getCryptocurrencyRate');
     }
   }
 }
