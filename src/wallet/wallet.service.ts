@@ -240,6 +240,7 @@ export class WalletService {
             type: 'exponential',
             delay: 5000,
           },
+          removeOnComplete: true,
         },
       );
 
