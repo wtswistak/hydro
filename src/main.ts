@@ -21,7 +21,7 @@ async function bootstrap() {
   const logger = new Logger('Main');
   app.useLogger(logger);
 
-  await app.listen(configService.port ?? 3000);
+  await app.listen(configService.port ?? 3000, process.env.HOST);
   logger.log(
     `Server is running on http://localhost:${configService.port ?? 3000}`,
   );
