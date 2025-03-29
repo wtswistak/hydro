@@ -6,6 +6,7 @@ import {
   Query,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { Transaction, Wallet } from '@prisma/client';
@@ -15,6 +16,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthRequest } from 'src/utils/interface';
 import { GetEstimatedFeeDto } from './dto/get-estimated-fee.dto';
 import { EstimatedFee } from 'src/blockchain/blockchain.service';
+import { BigIntInterceptor } from 'src/common/big-int.interceptor';
 
 @Controller('wallet')
 export class WalletController {
@@ -38,6 +40,7 @@ export class WalletController {
   }
 
   @Post('transaction')
+  @UseInterceptors(BigIntInterceptor)
   @UseGuards(AuthGuard('jwt'))
   createTransaction(
     @Req() req: AuthRequest,
