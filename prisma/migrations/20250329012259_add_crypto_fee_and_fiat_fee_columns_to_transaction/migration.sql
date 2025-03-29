@@ -6,6 +6,6 @@
 */
 -- AlterTable
 ALTER TABLE "transaction" DROP COLUMN "gas_Used",
-ADD COLUMN     "crypto_fee" BIGINT,
-ADD COLUMN     "fiat_fee" INTEGER,
+ADD COLUMN     "crypto_fee" DECIMAL(65,30),
+ADD COLUMN     "fiat_fee" DECIMAL(65,30),
 ADD COLUMN     "gas_used" BIGINT;

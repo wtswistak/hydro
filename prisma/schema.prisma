@@ -77,7 +77,7 @@ model EmailVerification {
 
 model Transaction {
   id                Int                   @id @default(autoincrement())
-  amount            Decimal @db.Decimal(36, 18)
+  amount            Decimal               @db.Decimal(36, 18)
   senderAddress     String                @map("sender_address")
   receiverAddress   String                @map("receiver_address")
   senderBalanceId   Int?                  @map("sender_balance_id")
@@ -88,8 +88,8 @@ model Transaction {
   gasLimit          BigInt?               @map("gas_limit")
   gasPrice          BigInt?               @map("gas_price")
   gasUsed           BigInt?               @map("gas_used")
-  cryptoFee         BigInt?               @map("crypto_fee")
-  fiatFee           Int?                  @map("fiat_fee")
+  cryptoFee         Decimal?              @map("crypto_fee")
+  fiatFee           Decimal?              @map("fiat_fee")
   blockNumber       Int?                  @map("block_number")
   createdAt         DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt         DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
