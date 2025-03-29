@@ -139,4 +139,10 @@ export class BlockchainService {
       this.handleError(error, 'estimateFee');
     }
   }
+
+  calculateFee({ gasPrice, gasUsed }: { gasPrice: bigint; gasUsed: bigint }) {
+    const feeInWei = gasPrice * gasUsed;
+
+    return Number(ethers.formatEther(feeInWei));
+  }
 }
