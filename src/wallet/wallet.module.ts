@@ -6,15 +6,18 @@ import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { CryptoService } from './crypto.service';
 import { BullQueueModule } from 'src/bull-mq/bull-mq.module';
 import { TransactionWorker } from 'src/bull-mq/worker/transaction.worker';
+import { CoingeckoService } from 'src/coingecko/coingecko.service';
+import { CoingeckoModule } from 'src/coingecko/coingecko.module';
 
 @Module({
-  imports: [BullQueueModule],
+  imports: [BullQueueModule, CoingeckoModule],
   controllers: [WalletController],
   providers: [
     WalletService,
     AppConfigService,
     BlockchainService,
     CryptoService,
+    CoingeckoService,
     TransactionWorker,
   ],
 })

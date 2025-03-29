@@ -4,7 +4,6 @@ import { CoingeckoService } from './coingecko.service';
 import { HttpModule } from '@nestjs/axios';
 import { AppConfigModule } from 'src/config/app-config.module';
 import { AppConfigService } from 'src/config/app-config.service';
-import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -20,5 +19,6 @@ import { AuthModule } from 'src/auth/auth.module';
   ],
   controllers: [CoingeckoController],
   providers: [CoingeckoService],
+  exports: [CoingeckoService, HttpModule],
 })
 export class CoingeckoModule {}

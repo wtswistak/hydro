@@ -13,7 +13,7 @@ export class CoingeckoService {
   constructor(private readonly httpService: HttpService) {}
 
   private handleError(error: any, message: string): void {
-    const { status, data } = error.response;
+    const { status, data } = error?.response;
     if (data?.error) {
       this.logger.error(`Coingeco API error in ${message}`);
       this.logger.error(`Error: ${data.error}, Status: ${status}`);

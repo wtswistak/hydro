@@ -3,6 +3,7 @@ import { Logger } from '@nestjs/common';
 import { TransactionStatus } from '@prisma/client';
 import { Job } from 'bullmq';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
+import { CoingeckoService } from 'src/coingecko/coingecko.service';
 import { WalletService } from 'src/wallet/wallet.service';
 
 @Processor('transaction')
@@ -11,6 +12,7 @@ export class TransactionWorker extends WorkerHost {
   constructor(
     private readonly blockchainService: BlockchainService,
     private readonly walletService: WalletService,
+    private readonly coingeckoService: CoingeckoService,
   ) {
     super();
   }
@@ -42,6 +44,14 @@ export class TransactionWorker extends WorkerHost {
           `Transaction ${txHash} updated with status: FAIL, status from blockchain: ${receipt.status}`,
         );
       }
+      const ethFee = this.blockchainService.calculateFee({
+        gasUsed: receipt.gasUsed,
+        gasPrice: receipt.gasPrice,
+      });
+      const rate = await this.coingeckoService.getCryptocurrencyRate({
+        id: 'ethereum',
+      });
+      const fiatFee = ethFee * rate;
 
       await this.walletService.updateTxDetails({
         txId,
@@ -50,6 +60,8 @@ export class TransactionWorker extends WorkerHost {
           blockNumber: receipt.blockNumber,
           gasUsed: receipt.gasUsed,
           gasPrice: receipt.gasPrice,
+          cryptoFee: ethFee,
+          fiatFee,
         },
       });
 
