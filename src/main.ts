@@ -23,7 +23,7 @@ async function bootstrap() {
 
   await app.listen(configService.port ?? 3000, process.env.HOST);
   logger.log(
-    `Server is running on http://localhost:${configService.port ?? 3000}`,
+    `Server is running on http://${process.env.Host}:${configService.port ?? 3000}`,
   );
 }
 bootstrap();
