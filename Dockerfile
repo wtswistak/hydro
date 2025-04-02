@@ -4,7 +4,6 @@ WORKDIR /app
 COPY . .
 RUN npm install
 RUN npx prisma generate
-RUN npx prisma migrate deploy
 RUN npm run build
 
 # Stage 2: run production
@@ -18,4 +17,4 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 RUN npm install --only=production
 EXPOSE 4000
-CMD ["node", "dist/src/main"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main"]
