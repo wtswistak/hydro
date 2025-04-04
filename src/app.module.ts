@@ -11,6 +11,7 @@ import { BlockchainModule } from './blockchain/blockchain.module';
 import { WalletModule } from './wallet/wallet.module';
 import { RedisModule } from './redis/redis.module';
 import { BullQueueModule } from './bull-mq/bull-mq.module';
+import { TransactionModule } from './transaction/transaction.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { BullQueueModule } from './bull-mq/bull-mq.module';
     WalletModule,
     RedisModule,
     BullQueueModule,
+    TransactionModule,
   ],
   providers: [MailersendService],
 })
