@@ -19,7 +19,6 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 # Copy entrypoint
-#test2
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
