@@ -6,17 +6,14 @@ import {
   Query,
   Req,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { WalletService } from './wallet.service';
-import { Transaction, Wallet } from '@prisma/client';
-import { CreateTxDto } from './dto/create-tx.dto';
+import { Wallet } from '@prisma/client';
 import { CreateWalletDto } from './dto/create-wallet.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthRequest } from 'src/utils/interface';
 import { GetEstimatedFeeDto } from './dto/get-estimated-fee.dto';
 import { EstimatedFee } from 'src/blockchain/blockchain.service';
-import { BigIntInterceptor } from 'src/common/big-int.interceptor';
 
 @Controller('wallet')
 export class WalletController {
@@ -37,20 +34,6 @@ export class WalletController {
   getBalance(@Req() req: AuthRequest): Promise<string> {
     const userId = req.user.id;
     return this.walletService.getBalance({ userId });
-  }
-
-  @Post('transaction')
-  @UseInterceptors(BigIntInterceptor)
-  @UseGuards(AuthGuard('jwt'))
-  createTransaction(
-    @Req() req: AuthRequest,
-    @Body() createTxDto: CreateTxDto,
-  ): Promise<Transaction> {
-    const userId = req.user.id;
-    return this.walletService.createTransaction({
-      userId,
-      ...createTxDto,
-    });
   }
 
   @Get('fee/estimated')
