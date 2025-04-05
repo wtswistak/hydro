@@ -82,22 +82,6 @@ export class WalletService {
     });
   }
 
-  async getBalance({ userId }: { userId: number }): Promise<string> {
-    this.logger.log(`Getting balance for user with id: ${userId}`);
-    const wallet = await this.getWalletByUserId({ userId });
-    if (!wallet) {
-      throw new WalletNotExistsException();
-    }
-    const balance = this.blockchainService.getBalance({
-      address: wallet.address,
-    });
-
-    if (!balance) {
-      throw new BalanceNotExistException();
-    }
-
-    return balance;
-  }
   async getBalances({ userId }: { userId: number }): Promise<Wallet[]> {
     const balances = await this.prisma.wallet.findMany({
       where: { userId },

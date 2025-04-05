@@ -29,13 +29,6 @@ export class WalletController {
     return this.walletService.createWallet({ userId, blockchain });
   }
 
-  @Get('balance')
-  @UseGuards(AuthGuard('jwt'))
-  getBalance(@Req() req: AuthRequest): Promise<string> {
-    const userId = req.user.id;
-    return this.walletService.getBalance({ userId });
-  }
-
   @Get('fee/estimated')
   @UseGuards(AuthGuard('jwt'))
   getEstimatedFee(
