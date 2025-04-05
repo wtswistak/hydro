@@ -4,7 +4,7 @@ import { CoingeckoService } from './coingecko.service';
 import { HttpModule } from '@nestjs/axios';
 import { AppConfigModule } from 'src/config/app-config.module';
 import { AppConfigService } from 'src/config/app-config.service';
-import { RedisModule } from 'src/redis/redis.module';
+import { RedisModule } from 'src/database/redis/redis.module';
 
 @Module({
   imports: [

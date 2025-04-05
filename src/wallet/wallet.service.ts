@@ -3,7 +3,7 @@ import {
   BlockchainService,
   EstimatedFee,
 } from 'src/blockchain/blockchain.service';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/database/prisma/prisma.service';
 import { CryptoService } from './crypto.service';
 import { Prisma, Wallet } from '@prisma/client';
 import { WalletExistsException } from './exception/wallet-exist.exception';

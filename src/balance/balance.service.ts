@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Balance, Prisma } from '@prisma/client';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/database/prisma/prisma.service';
 import { BalanceNotExistException } from 'src/wallet/exception/balance-not-exist.exception';
 import { WalletService } from 'src/wallet/wallet.service';
 

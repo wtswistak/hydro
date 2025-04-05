@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { TransactionController } from './transaction.controller';
 import { BullQueueModule } from 'src/bull-mq/bull-mq.module';
-import { RedisModule } from 'src/redis/redis.module';
+import { RedisModule } from 'src/database/redis/redis.module';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { CryptoService } from 'src/wallet/crypto.service';
 import { TransactionWorker } from 'src/bull-mq/worker/transaction.worker';

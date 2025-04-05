@@ -4,7 +4,7 @@ import { Prisma, Transaction, TransactionStatus } from '@prisma/client';
 import { Queue } from 'bullmq';
 import { BalanceService } from 'src/balance/balance.service';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/database/prisma/prisma.service';
 import { CryptoService } from 'src/wallet/crypto.service';
 import { CreateTxDto } from 'src/wallet/dto/create-tx.dto';
 import { BalanceAmountTooLowException } from 'src/wallet/exception/balance-amount-too-low.exception';
