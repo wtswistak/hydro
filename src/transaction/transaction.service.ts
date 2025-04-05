@@ -144,4 +144,17 @@ export class TransactionService {
     });
     return prismaTx;
   }
+
+  updateTxDetails({
+    txId,
+    data,
+  }: {
+    txId: number;
+    data: Partial<Transaction>;
+  }) {
+    return this.prisma.transaction.update({
+      where: { id: txId },
+      data,
+    });
+  }
 }

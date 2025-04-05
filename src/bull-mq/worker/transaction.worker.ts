@@ -1,18 +1,18 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
-import { TransactionStatus } from '@prisma/client';
+import { Prisma, TransactionStatus } from '@prisma/client';
 import { Job } from 'bullmq';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { CoingeckoService } from 'src/coingecko/coingecko.service';
-import { WalletService } from 'src/wallet/wallet.service';
+import { TransactionService } from 'src/transaction/transaction.service';
 
 @Processor('transaction')
 export class TransactionWorker extends WorkerHost {
   private readonly logger = new Logger(TransactionWorker.name);
   constructor(
     private readonly blockchainService: BlockchainService,
-    private readonly walletService: WalletService,
     private readonly coingeckoService: CoingeckoService,
+    private readonly transactionService: TransactionService,
   ) {
     super();
   }
@@ -53,15 +53,15 @@ export class TransactionWorker extends WorkerHost {
       });
       const fiatFee = ethFee * rate;
 
-      await this.walletService.updateTxDetails({
+      await this.transactionService.updateTxDetails({
         txId,
         data: {
           status,
           blockNumber: receipt.blockNumber,
           gasUsed: receipt.gasUsed,
           gasPrice: receipt.gasPrice,
-          cryptoFee: ethFee,
-          fiatFee,
+          cryptoFee: new Prisma.Decimal(ethFee),
+          fiatFee: new Prisma.Decimal(fiatFee),
         },
       });
 

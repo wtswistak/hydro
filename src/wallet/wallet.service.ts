@@ -5,7 +5,7 @@ import {
 } from 'src/blockchain/blockchain.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CryptoService } from './crypto.service';
-import { Prisma, TransactionStatus, Wallet } from '@prisma/client';
+import { Prisma, Wallet } from '@prisma/client';
 import { WalletExistsException } from './exception/wallet-exist.exception';
 import { CreateWalletDto } from './dto/create-wallet.dto';
 import { ChainNotExistsException } from './exception/chain-not-exists.exception';
@@ -110,28 +110,6 @@ export class WalletService {
       },
     });
     return balances;
-  }
-
-  updateTxStatus({
-    txId,
-    status,
-  }: {
-    txId: number;
-    status: TransactionStatus;
-  }) {
-    return this.prisma.transaction.update({
-      where: { id: txId },
-      data: {
-        status,
-      },
-    });
-  }
-
-  updateTxDetails({ txId, data }: { txId: number; data: any }) {
-    return this.prisma.transaction.update({
-      where: { id: txId },
-      data,
-    });
   }
 
   async getEstimatedFee({
