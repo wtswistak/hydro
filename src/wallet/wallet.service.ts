@@ -9,7 +9,6 @@ import { Prisma, Wallet } from '@prisma/client';
 import { WalletExistsException } from './exception/wallet-exist.exception';
 import { CreateWalletDto } from './dto/create-wallet.dto';
 import { ChainNotExistsException } from './exception/chain-not-exists.exception';
-import { BalanceNotExistException } from './exception/balance-not-exist.exception';
 import { WalletNotExistsException } from './exception/wallet-not-exist.exception';
 import { GetEstimatedFeeDto } from './dto/get-estimated-fee.dto';
 
@@ -80,20 +79,6 @@ export class WalletService {
         userId,
       },
     });
-  }
-
-  async getBalances({ userId }: { userId: number }): Promise<Wallet[]> {
-    const balances = await this.prisma.wallet.findMany({
-      where: { userId },
-      include: {
-        balances: {
-          include: {
-            cryptoToken: true,
-          },
-        },
-      },
-    });
-    return balances;
   }
 
   async getEstimatedFee({

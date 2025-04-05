@@ -10,6 +10,7 @@ import { WalletService } from 'src/wallet/wallet.service';
 import { AppConfigService } from 'src/config/app-config.service';
 import { CoingeckoService } from 'src/coingecko/coingecko.service';
 import { CoingeckoModule } from 'src/coingecko/coingecko.module';
+import { BalanceService } from 'src/balance/balance.service';
 
 @Module({
   imports: [BullQueueModule, CoingeckoModule, RedisModule],
@@ -22,6 +23,7 @@ import { CoingeckoModule } from 'src/coingecko/coingecko.module';
     CoingeckoService,
     WalletService,
     TransactionWorker,
+    BalanceService,
   ],
 })
 export class TransactionModule {}

@@ -1,7 +1,8 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
-import { Transaction, TransactionStatus } from '@prisma/client';
+import { Prisma, Transaction, TransactionStatus } from '@prisma/client';
 import { Queue } from 'bullmq';
+import { BalanceService } from 'src/balance/balance.service';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CryptoService } from 'src/wallet/crypto.service';
@@ -19,6 +20,7 @@ export class TransactionService {
     private readonly walletService: WalletService,
     private readonly blockchainService: BlockchainService,
     private readonly cryptoService: CryptoService,
+    private readonly balanceService: BalanceService,
     @InjectQueue('transaction')
     private readonly transactionQueue: Queue,
   ) {}
@@ -43,28 +45,20 @@ export class TransactionService {
       if (wallet.userId !== userId) {
         throw new WalletNotMatchException();
       }
-      const balance = await prismaTx.balance.findUnique({
-        where: {
-          walletId_cryptoTokenId: {
-            walletId: wallet.id,
-            cryptoTokenId: cryptoToken.id,
-          },
+      const balance = await this.balanceService.getBalanceByWalletId(
+        {
+          walletId: wallet.id,
+          cryptoTokenId: cryptoToken.id,
         },
-      });
-      if (!balance) {
-        throw new BalanceNotExistException();
-      }
+        prismaTx,
+      );
       if (balance.amount < amount) {
         throw new BalanceAmountTooLowException();
       }
-      const newSenderBalance = await prismaTx.balance.update({
-        where: { id: balance.id },
-        data: {
-          amount: {
-            decrement: amount,
-          },
-        },
-      });
+      const newSenderBalance = await this.balanceService.updateBalance(
+        { balanceId: balance.id, amount: -amount },
+        prismaTx,
+      );
       this.logger.log(
         `Balance updated id: ${newSenderBalance.id}, new amount: ${newSenderBalance.amount}`,
       );
@@ -76,24 +70,14 @@ export class TransactionService {
       if (receiverWallet) {
         this.logger.log(`Receiver wallet found id: ${receiverWallet.id}`);
         // check if receiver balance exists and update
-        const receiverBalance = await prismaTx.balance.upsert({
-          where: {
-            walletId_cryptoTokenId: {
-              walletId: receiverWallet.id,
-              cryptoTokenId: cryptoToken.id,
-            },
-          },
-          update: {
-            amount: {
-              increment: amount,
-            },
-          },
-          create: {
+        const receiverBalance = await this.balanceService.upsertBalance(
+          {
             walletId: receiverWallet.id,
             cryptoTokenId: cryptoToken.id,
-            amount,
+            amount: new Prisma.Decimal(amount),
           },
-        });
+          prismaTx,
+        );
         receiverBalanceId = receiverBalance.id;
         this.logger.log(
           `Receiver balance updated, new amount: ${receiverBalance.amount}`,

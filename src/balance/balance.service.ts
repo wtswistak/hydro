@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { Balance, Prisma } from '@prisma/client';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BalanceNotExistException } from 'src/wallet/exception/balance-not-exist.exception';
@@ -23,6 +24,78 @@ export class BalanceService {
     if (!balance) {
       throw new BalanceNotExistException();
     }
+
+    return balance;
+  }
+
+  async getBalanceByWalletId(
+    {
+      walletId,
+      cryptoTokenId,
+    }: {
+      walletId: number;
+      cryptoTokenId: number;
+    },
+    prisma: Prisma.TransactionClient | PrismaService = this.prisma,
+  ): Promise<Balance> {
+    this.logger.log(`Getting balance for wallet with id: ${walletId}`);
+    const balance = await prisma.balance.findUnique({
+      where: {
+        walletId_cryptoTokenId: {
+          walletId,
+          cryptoTokenId,
+        },
+      },
+    });
+
+    if (!balance) {
+      throw new BalanceNotExistException();
+    }
+
+    return balance;
+  }
+
+  async updateBalance(
+    {
+      balanceId,
+      amount,
+    }: {
+      balanceId: number;
+      amount: number;
+    },
+    prisma: Prisma.TransactionClient | PrismaService = this.prisma,
+  ): Promise<Balance> {
+    const balance = await prisma.balance.update({
+      where: { id: balanceId },
+      data: { amount },
+    });
+
+    return balance;
+  }
+
+  async upsertBalance(
+    { walletId, cryptoTokenId, amount }: Partial<Balance>,
+    prisma: Prisma.TransactionClient | PrismaService = this.prisma,
+  ): Promise<Balance> {
+    this.logger.log(`Upserting balance for wallet with id: ${walletId}`);
+    const balance = await prisma.balance.upsert({
+      where: {
+        walletId_cryptoTokenId: {
+          walletId,
+          cryptoTokenId,
+        },
+      },
+      update: {
+        amount: {
+          increment: amount,
+        },
+      },
+      create: {
+        walletId,
+        cryptoTokenId,
+        amount,
+      },
+    });
 
     return balance;
   }
