@@ -13,6 +13,7 @@ import { RedisModule } from './database/redis/redis.module';
 import { BullQueueModule } from './bull-mq/bull-mq.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { BalanceModule } from './balance/balance.module';
+import { WebhookModule } from './webhook/webhook.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { BalanceModule } from './balance/balance.module';
     BullQueueModule,
     TransactionModule,
     BalanceModule,
+    WebhookModule,
   ],
   providers: [MailersendService],
 })
