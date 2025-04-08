@@ -4,6 +4,8 @@ import { WalletService } from './wallet.service';
 import { AppConfigService } from 'src/config/app-config.service';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { CryptoService } from './crypto.service';
+import { CoingeckoModule } from 'src/coingecko/coingecko.module';
+import { WalletRepository } from './wallet.repository';
 
 @Module({
   controllers: [WalletController],
@@ -12,6 +14,8 @@ import { CryptoService } from './crypto.service';
     AppConfigService,
     BlockchainService,
     CryptoService,
+    WalletRepository,
   ],
+  exports: [WalletService, WalletRepository],
 })
 export class WalletModule {}

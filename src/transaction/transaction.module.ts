@@ -9,10 +9,11 @@ import { WalletService } from 'src/wallet/wallet.service';
 import { AppConfigService } from 'src/config/app-config.service';
 import { CoingeckoModule } from 'src/coingecko/coingecko.module';
 import { BalanceService } from 'src/balance/balance.service';
+import { WalletModule } from 'src/wallet/wallet.module';
 import { TransactionWorker } from 'src/bull-mq/worker/transaction.worker';
 
 @Module({
-  imports: [BullQueueModule, CoingeckoModule, RedisModule],
+  imports: [BullQueueModule, CoingeckoModule, RedisModule, WalletModule],
   controllers: [TransactionController],
   providers: [
     AppConfigService,

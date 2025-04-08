@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Balance, Prisma } from '@prisma/client';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { PrismaService } from 'src/database/prisma/prisma.service';
+import { PrismaClient } from 'src/database/prisma/prisma.type';
 import { BalanceNotExistException } from 'src/wallet/exception/balance-not-exist.exception';
 import { WalletService } from 'src/wallet/wallet.service';
 
@@ -36,7 +37,7 @@ export class BalanceService {
       walletId: number;
       cryptoTokenId: number;
     },
-    prisma: Prisma.TransactionClient | PrismaService = this.prisma,
+    prisma: PrismaClient = this.prisma,
   ): Promise<Balance> {
     this.logger.log(`Getting balance for wallet with id: ${walletId}`);
     const balance = await prisma.balance.findUnique({
@@ -63,7 +64,7 @@ export class BalanceService {
       balanceId: number;
       amount: number;
     },
-    prisma: Prisma.TransactionClient | PrismaService = this.prisma,
+    prisma: PrismaClient = this.prisma,
   ): Promise<Balance> {
     const balance = await prisma.balance.update({
       where: { id: balanceId },
@@ -75,7 +76,7 @@ export class BalanceService {
 
   async upsertBalance(
     { walletId, cryptoTokenId, amount }: Partial<Balance>,
-    prisma: Prisma.TransactionClient | PrismaService = this.prisma,
+    prisma: PrismaClient = this.prisma,
   ): Promise<Balance> {
     this.logger.log(`Upserting balance for wallet with id: ${walletId}`);
     const balance = await prisma.balance.upsert({

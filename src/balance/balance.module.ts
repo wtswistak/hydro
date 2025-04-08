@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
 import { BalanceController } from './balance.controller';
 import { BalanceService } from './balance.service';
-import { WalletService } from 'src/wallet/wallet.service';
 import { AppConfigService } from 'src/config/app-config.service';
+import { CryptoService } from 'src/wallet/crypto.service';
+import { WalletModule } from 'src/wallet/wallet.module';
 import { TransactionModule } from 'src/transaction/transaction.module';
 
 @Module({
-  imports: [TransactionModule],
+  imports: [WalletModule, TransactionModule],
   controllers: [BalanceController],
-  providers: [BalanceService, AppConfigService, WalletService],
+  providers: [BalanceService, AppConfigService, CryptoService],
 })
 export class BalanceModule {}
