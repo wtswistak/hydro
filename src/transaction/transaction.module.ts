@@ -11,9 +11,10 @@ import { AppConfigService } from 'src/config/app-config.service';
 import { CoingeckoService } from 'src/coingecko/coingecko.service';
 import { CoingeckoModule } from 'src/coingecko/coingecko.module';
 import { BalanceService } from 'src/balance/balance.service';
+import { WalletModule } from 'src/wallet/wallet.module';
 
 @Module({
-  imports: [BullQueueModule, CoingeckoModule, RedisModule],
+  imports: [BullQueueModule, CoingeckoModule, RedisModule, WalletModule],
   controllers: [TransactionController],
   providers: [
     AppConfigService,
@@ -21,7 +22,6 @@ import { BalanceService } from 'src/balance/balance.service';
     BlockchainService,
     CryptoService,
     CoingeckoService,
-    WalletService,
     TransactionWorker,
     BalanceService,
   ],

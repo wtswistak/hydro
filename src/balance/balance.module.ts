@@ -6,14 +6,15 @@ import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { WalletService } from 'src/wallet/wallet.service';
 import { AppConfigService } from 'src/config/app-config.service';
 import { CryptoService } from 'src/wallet/crypto.service';
+import { WalletModule } from 'src/wallet/wallet.module';
 
 @Module({
+  imports: [WalletModule],
   controllers: [BalanceController],
   providers: [
     BalanceService,
     PrismaService,
     BlockchainService,
-    WalletService,
     AppConfigService,
     CryptoService,
   ],
