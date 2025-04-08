@@ -12,6 +12,7 @@ import { ChainNotExistsException } from './exception/chain-not-exists.exception'
 import { WalletNotExistsException } from './exception/wallet-not-exist.exception';
 import { GetEstimatedFeeDto } from './dto/get-estimated-fee.dto';
 import { WalletRepository } from './wallet.repository';
+import { PrismaClient } from 'src/database/prisma/prisma.type';
 
 @Injectable()
 export class WalletService {
@@ -28,7 +29,9 @@ export class WalletService {
     blockchain,
   }: { userId: number } & CreateWalletDto): Promise<Wallet> {
     this.logger.log(`Checking if wallet exists for user with id: ${userId}`);
-    const existingWallet = await this.getWalletByUserId({ userId });
+    const existingWallet = await this.walletRepository.getWalletByUserId({
+      userId,
+    });
     if (existingWallet) {
       throw new WalletExistsException();
     }
@@ -46,7 +49,7 @@ export class WalletService {
     });
 
     const newWallet = await this.prisma.$transaction(async (prisma) => {
-      const wallet = await this.prisma.wallet.create({
+      const wallet = await prisma.wallet.create({
         data: {
           address: blockchainWallet.address,
           privateKey: encryptedKey,
@@ -60,7 +63,7 @@ export class WalletService {
       });
 
       this.logger.log(`Creating balance for wallet with id: ${wallet.id}`);
-      await this.prisma.balance.createMany({
+      await prisma.balance.createMany({
         data: cryptoTokens.map((token) => ({
           walletId: wallet.id,
           cryptoTokenId: token.id,
@@ -73,14 +76,6 @@ export class WalletService {
     });
 
     return newWallet;
-  }
-
-  getWalletByUserId({ userId }: { userId: number }): Promise<Wallet> {
-    return this.prisma.wallet.findFirst({
-      where: {
-        userId,
-      },
-    });
   }
 
   async getEstimatedFee({
@@ -98,7 +93,7 @@ export class WalletService {
 
   async getWalletById(
     { id }: { id: number },
-    prisma: Prisma.TransactionClient | PrismaService = this.prisma,
+    prisma: PrismaClient = this.prisma,
   ): Promise<Wallet> {
     const wallet = await this.walletRepository.getWalletById({ id }, prisma);
     if (!wallet) {
@@ -109,12 +104,20 @@ export class WalletService {
 
   async getWalletByAddress(
     { address }: { address: string },
-    prisma: Prisma.TransactionClient | PrismaService = this.prisma,
+    prisma: PrismaClient = this.prisma,
   ): Promise<Wallet> {
     const wallet = await this.walletRepository.getWalletByAddress(
       { address },
       prisma,
     );
+    if (!wallet) {
+      throw new WalletNotExistsException();
+    }
+    return wallet;
+  }
+
+  async getWalletByUserId({ userId }: { userId: number }): Promise<Wallet> {
+    const wallet = await this.walletRepository.getWalletByUserId({ userId });
     if (!wallet) {
       throw new WalletNotExistsException();
     }
