@@ -11,6 +11,7 @@ import { CreateWalletDto } from './dto/create-wallet.dto';
 import { ChainNotExistsException } from './exception/chain-not-exists.exception';
 import { WalletNotExistsException } from './exception/wallet-not-exist.exception';
 import { GetEstimatedFeeDto } from './dto/get-estimated-fee.dto';
+import { WalletRepository } from './wallet.repository';
 
 @Injectable()
 export class WalletService {
@@ -19,6 +20,7 @@ export class WalletService {
     private prisma: PrismaService,
     private blockchainService: BlockchainService,
     private cryptoService: CryptoService,
+    private walletRepository: WalletRepository,
   ) {}
 
   async createWallet({
@@ -98,21 +100,24 @@ export class WalletService {
     { id }: { id: number },
     prisma: Prisma.TransactionClient | PrismaService = this.prisma,
   ): Promise<Wallet> {
-    const wallet = await prisma.wallet.findUnique({
-      where: { id },
-    });
+    const wallet = await this.walletRepository.getWalletById({ id }, prisma);
     if (!wallet) {
       throw new WalletNotExistsException();
     }
     return wallet;
   }
 
-  getWalletByAddress(
+  async getWalletByAddress(
     { address }: { address: string },
     prisma: Prisma.TransactionClient | PrismaService = this.prisma,
   ): Promise<Wallet> {
-    return prisma.wallet.findUnique({
-      where: { address },
-    });
+    const wallet = await this.walletRepository.getWalletByAddress(
+      { address },
+      prisma,
+    );
+    if (!wallet) {
+      throw new WalletNotExistsException();
+    }
+    return wallet;
   }
 }
