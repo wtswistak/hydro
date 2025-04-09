@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Balance, Prisma } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { PrismaClient } from 'src/database/prisma/prisma.type';
@@ -62,7 +63,7 @@ export class BalanceService {
       amount,
     }: {
       balanceId: number;
-      amount: number;
+      amount: Decimal;
     },
     prisma: PrismaClient = this.prisma,
   ): Promise<Balance> {

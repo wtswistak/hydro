@@ -56,7 +56,7 @@ export class TransactionService {
         throw new BalanceAmountTooLowException();
       }
       const newSenderBalance = await this.balanceService.updateBalance(
-        { balanceId: balance.id, amount: -amount },
+        { balanceId: balance.id, amount: new Prisma.Decimal(-amount) },
         prismaTx,
       );
       this.logger.log(
