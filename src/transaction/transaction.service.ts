@@ -5,10 +5,10 @@ import { Queue } from 'bullmq';
 import { BalanceService } from 'src/balance/balance.service';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { PrismaService } from 'src/database/prisma/prisma.service';
+import { PrismaClient } from 'src/database/prisma/prisma.type';
 import { CryptoService } from 'src/wallet/crypto.service';
 import { CreateTxDto } from 'src/wallet/dto/create-tx.dto';
 import { BalanceAmountTooLowException } from 'src/wallet/exception/balance-amount-too-low.exception';
-import { BalanceNotExistException } from 'src/wallet/exception/balance-not-exist.exception';
 import { WalletNotMatchException } from 'src/wallet/exception/wallet-not-match.exception';
 import { WalletService } from 'src/wallet/wallet.service';
 
@@ -93,8 +93,8 @@ export class TransactionService {
         privateKey: decryptedPrivateKey,
       });
 
-      const tx = await prismaTx.transaction.create({
-        data: {
+      const tx = await this.createTx(
+        {
           amount,
           status: TransactionStatus.PENDING,
           receiverAddress,
@@ -105,7 +105,8 @@ export class TransactionService {
           nonce: blockchainTx.nonce,
           gasLimit: blockchainTx.gasLimit,
         },
-      });
+        prismaTx,
+      );
       this.logger.log(`Transaction created with id: ${tx.id}`);
 
       await this.transactionQueue.add(
@@ -139,6 +140,22 @@ export class TransactionService {
     return this.prisma.transaction.update({
       where: { id: txId },
       data,
+    });
+  }
+
+  createTx(data: Partial<Transaction>, prisma: PrismaClient = this.prisma) {
+    return prisma.transaction.create({
+      data: {
+        amount: new Prisma.Decimal(data.amount),
+        status: data.status,
+        receiverAddress: data.receiverAddress,
+        senderAddress: data.senderAddress,
+        hash: data.hash,
+        senderBalanceId: data.senderBalanceId,
+        receiverBalanceId: data.receiverBalanceId,
+        nonce: data.nonce,
+        gasLimit: data.gasLimit,
+      },
     });
   }
 }
