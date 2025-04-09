@@ -1,4 +1,106 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { Prisma, TransactionStatus } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
+import { PrismaService } from 'src/database/prisma/prisma.service';
+import { TransactionService } from 'src/transaction/transaction.service';
+import { WalletService } from 'src/wallet/wallet.service';
+import { AlchemyAddressActivityDto } from './dto/AlchemyAddressActivityDto';
+import { BalanceService } from 'src/balance/balance.service';
 
 @Injectable()
-export class WebhookService {}
+export class WebhookService {
+  private readonly logger = new Logger(WebhookService.name);
+  constructor(
+    private readonly transactionService: TransactionService,
+    private readonly prisma: PrismaService,
+    private readonly walletService: WalletService,
+    private readonly balanceService: BalanceService,
+  ) {}
+  async handleAlchemyWebhook(
+    payload: AlchemyAddressActivityDto,
+  ): Promise<void> {
+    this.logger.log(
+      `Handling Alchemy webhook for event: ${payload.type}, tx hash: ${payload.event.activity[0].hash}`,
+    );
+    const prismaTx = this.prisma.$transaction(async (prismaTx) => {
+      const { activity } = payload.event;
+      const cryptoToken = await prismaTx.cryptoToken.findUnique({
+        where: { symbol: activity[0].asset },
+      });
+      if (!cryptoToken) {
+        this.logger.error(
+          `Crypto token not found for symbol: ${activity[0].asset}`,
+        );
+        return;
+      }
+
+      const receiverWallet = await this.walletService.getWalletByAddress(
+        {
+          address: activity[0].toAddress,
+        },
+        prismaTx,
+      );
+      if (receiverWallet) {
+        const receiverBalance = await this.balanceService.getBalanceByWalletId(
+          {
+            walletId: receiverWallet.id,
+            cryptoTokenId: cryptoToken.id,
+          },
+          prismaTx,
+        );
+        this.logger.log(
+          `Receiver balance found for wallet id: ${receiverWallet.id}, with amount: ${activity[0].value}`,
+        );
+        const newBalance = await this.balanceService.updateBalance(
+          {
+            balanceId: receiverBalance.id,
+            amount: new Decimal(activity[0].value),
+          },
+          prismaTx,
+        );
+        this.logger.log(
+          `Receiver balance updated id: ${newBalance.id}, new amount: ${newBalance.amount}`,
+        );
+      }
+
+      const tx = await this.transactionService.createTx(
+        {
+          hash: activity[0].hash,
+          senderAddress: activity[0].fromAddress,
+          receiverAddress: activity[0].toAddress,
+          amount: new Prisma.Decimal(activity[0].value),
+          status: TransactionStatus.SUCCESS,
+          ...(receiverWallet && {
+            receiverWalletId: receiverWallet.id,
+          }),
+        },
+        prismaTx,
+      );
+      this.logger.log(`Transaction created with id: ${tx.id}`);
+    });
+  }
+}
+
+// "webhookId":"wh_9y7crs52n47xqk6s",
+// "id":"whevt_ttjn9wnlkjkow3f3",
+// "createdAt":"2025-04-06T16:26:38.580Z",
+// "type":"ADDRESS_ACTIVITY",
+// "event":
+//   {
+//     "network":"ETH_SEPOLIA",
+//     "activity":[{
+//       "fromAddress":"0x2e698fcd633df16411f9f4b1709442da36056b0e",
+//       "toAddress":"0x6df4be74aeb8d48f740f3396a65175ce9dcd3a21",
+//       "blockNum":"0x7b0cf5",
+//       "hash":"0x60bd4df90dff08db9c34edeb83f04cb06e49da60338e27435748a2cf0bf18b7f",
+//       "value":0.001,
+//       "asset":"ETH",
+//       "category":"external",
+//       "rawContract":
+//         {
+//           "rawValue":"0x38d7ea4c68000",
+//           "decimals":18
+//         }
+//       }]
+//       ,"source":"chainlake-kafka"
+//     }
