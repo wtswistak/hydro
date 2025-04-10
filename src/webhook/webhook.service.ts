@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Prisma, TransactionStatus } from '@prisma/client';
-import { Decimal } from '@prisma/client/runtime/library';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { TransactionService } from 'src/transaction/transaction.service';
 import { WalletService } from 'src/wallet/wallet.service';
@@ -33,7 +32,7 @@ export class WebhookService {
       return;
     }
 
-    const prismaTx = this.prisma.$transaction(async (prismaTx) => {
+    await this.prisma.$transaction(async (prismaTx) => {
       const cryptoToken = await prismaTx.cryptoToken.findUnique({
         where: { symbol: activity[0].asset },
       });
