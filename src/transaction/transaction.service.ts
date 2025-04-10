@@ -158,4 +158,10 @@ export class TransactionService {
       },
     });
   }
+
+  getTxByHash({ hash }: { hash: string }) {
+    return this.prisma.transaction.findUnique({
+      where: { hash },
+    });
+  }
 }

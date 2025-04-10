@@ -22,8 +22,18 @@ export class WebhookService {
     this.logger.log(
       `Handling Alchemy webhook for event: ${payload.type}, tx hash: ${payload.event.activity[0].hash}`,
     );
+    const { activity } = payload.event;
+    const existingTx = await this.transactionService.getTxByHash({
+      hash: activity[0].hash,
+    });
+    if (existingTx) {
+      this.logger.log(
+        `Transaction already exists with hash: ${activity[0].hash}`,
+      );
+      return;
+    }
+
     const prismaTx = this.prisma.$transaction(async (prismaTx) => {
-      const { activity } = payload.event;
       const cryptoToken = await prismaTx.cryptoToken.findUnique({
         where: { symbol: activity[0].asset },
       });
