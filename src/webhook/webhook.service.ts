@@ -33,6 +33,7 @@ export class WebhookService {
     }
 
     await this.prisma.$transaction(async (prismaTx) => {
+      let receiverBalanceId = null;
       const cryptoToken = await prismaTx.cryptoToken.findUnique({
         where: { symbol: activity[0].asset },
       });
@@ -60,6 +61,7 @@ export class WebhookService {
           },
           prismaTx,
         );
+        receiverBalanceId = receiverBalance.id;
         this.logger.log(
           `Receiver balance found for wallet id: ${receiverWallet.id}, with amount: ${activity[0].value}`,
         );
@@ -82,8 +84,8 @@ export class WebhookService {
           receiverAddress: activity[0].toAddress,
           amount: new Prisma.Decimal(activity[0].value),
           status: TransactionStatus.SUCCESS,
-          ...(receiverWallet && {
-            receiverWalletId: receiverWallet.id,
+          ...(receiverBalanceId && {
+            receiverBalanceId,
           }),
         },
         prismaTx,
