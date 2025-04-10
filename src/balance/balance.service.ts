@@ -63,13 +63,17 @@ export class BalanceService {
       amount,
     }: {
       balanceId: number;
-      amount: Decimal;
+      amount: number;
     },
     prisma: PrismaClient = this.prisma,
   ): Promise<Balance> {
     const balance = await prisma.balance.update({
       where: { id: balanceId },
-      data: { amount },
+      data: {
+        amount: {
+          increment: new Decimal(amount),
+        },
+      },
     });
 
     return balance;

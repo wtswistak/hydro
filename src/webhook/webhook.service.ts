@@ -44,6 +44,9 @@ export class WebhookService {
         return;
       }
 
+      this.logger.log(
+        `Checking if receiver wallet exists for address: ${activity[0].toAddress}`,
+      );
       const receiverWallet = await this.walletService.getWalletByAddress(
         {
           address: activity[0].toAddress,
@@ -64,7 +67,7 @@ export class WebhookService {
         const newBalance = await this.balanceService.updateBalance(
           {
             balanceId: receiverBalance.id,
-            amount: new Decimal(activity[0].value),
+            amount: activity[0].value,
           },
           prismaTx,
         );
