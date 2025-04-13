@@ -5,6 +5,8 @@ import { TransactionService } from 'src/transaction/transaction.service';
 import { WalletService } from 'src/wallet/wallet.service';
 import { AlchemyAddressActivityDto } from './dto/AlchemyAddressActivityDto';
 import { BalanceService } from 'src/balance/balance.service';
+import { BlockchainService } from 'src/blockchain/blockchain.service';
+import { CoingeckoService } from 'src/coingecko/coingecko.service';
 
 @Injectable()
 export class WebhookService {
@@ -14,6 +16,8 @@ export class WebhookService {
     private readonly prisma: PrismaService,
     private readonly walletService: WalletService,
     private readonly balanceService: BalanceService,
+    private readonly blockchainService: BlockchainService,
+    private readonly coingeckoService: CoingeckoService,
   ) {}
   async handleAlchemyWebhook(
     payload: AlchemyAddressActivityDto,
@@ -91,6 +95,29 @@ export class WebhookService {
         prismaTx,
       );
       this.logger.log(`Transaction created with id: ${tx.id}`);
+
+      const txReceipt = await this.blockchainService.getTransactionReceipt({
+        txHash: activity[0].hash,
+      });
+
+      const ethFee = this.blockchainService.calculateFee({
+        gasUsed: txReceipt.gasUsed,
+        gasPrice: txReceipt.gasPrice,
+      });
+      const rate = await this.coingeckoService.getCryptocurrencyRate({
+        id: 'ethereum',
+      });
+      const fiatFee = ethFee * rate;
+      await this.transactionService.updateTxDetails({
+        txId: tx.id,
+        data: {
+          gasUsed: txReceipt.gasUsed,
+          gasPrice: txReceipt.gasPrice,
+          cryptoFee: new Prisma.Decimal(ethFee),
+          fiatFee: new Prisma.Decimal(fiatFee),
+        },
+      });
+      this.logger.log(`Transaction fee details updated for tx id: ${tx.id}`);
     });
   }
 }
