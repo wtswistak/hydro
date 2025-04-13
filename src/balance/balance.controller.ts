@@ -7,7 +7,7 @@ import { AuthGuard } from '@nestjs/passport';
 export class BalanceController {
   constructor(private readonly balanceService: BalanceService) {}
 
-  @Get('balance')
+  @Get()
   @UseGuards(AuthGuard('jwt'))
   getBalance(@Req() req: AuthRequest): Promise<string> {
     const userId = req.user.id;
