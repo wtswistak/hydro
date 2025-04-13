@@ -21,6 +21,6 @@ import { RedisModule } from 'src/database/redis/redis.module';
   ],
   controllers: [CoingeckoController],
   providers: [CoingeckoService],
-  exports: [CoingeckoService, HttpModule],
+  exports: [CoingeckoService, HttpModule, RedisModule],
 })
 export class CoingeckoModule {}

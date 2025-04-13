@@ -4,9 +4,10 @@ import { WebhookService } from './webhook.service';
 import { TransactionModule } from 'src/transaction/transaction.module';
 import { WalletModule } from 'src/wallet/wallet.module';
 import { BalanceService } from 'src/balance/balance.service';
+import { CoingeckoModule } from 'src/coingecko/coingecko.module';
 
 @Module({
-  imports: [TransactionModule, WalletModule],
+  imports: [TransactionModule, WalletModule, CoingeckoModule],
   controllers: [WebhookController],
   providers: [WebhookService, BalanceService],
 })
