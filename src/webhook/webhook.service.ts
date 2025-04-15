@@ -105,7 +105,7 @@ export class WebhookService {
         gasPrice: txReceipt.gasPrice,
       });
       const rate = await this.coingeckoService.getCryptocurrencyRate({
-        id: 'ethereum',
+        id: cryptoToken.name.toLowerCase(),
       });
       const fiatFee = ethFee * rate;
       await this.transactionService.updateTxDetails({
