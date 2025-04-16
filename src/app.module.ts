@@ -14,6 +14,8 @@ import { BullQueueModule } from './bull-mq/bull-mq.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { BalanceModule } from './balance/balance.module';
 import { WebhookModule } from './webhook/webhook.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CronService } from './cron/cron.service';
 
 @Module({
   imports: [
@@ -31,7 +33,8 @@ import { WebhookModule } from './webhook/webhook.module';
     TransactionModule,
     BalanceModule,
     WebhookModule,
+    ScheduleModule.forRoot(),
   ],
-  providers: [MailersendService],
+  providers: [MailersendService, CronService],
 })
 export class AppModule {}
