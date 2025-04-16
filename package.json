@@ -33,6 +33,7 @@
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/schedule": "^5.0.1",
     "@prisma/client": "^6.1.0",
     "@types/cookie-parser": "^1.4.8",
     "axios": "^1.7.9",
