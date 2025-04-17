@@ -149,6 +149,17 @@ model Blockchain {
   @@map("blockchain")
 }
 
+model FeeSnapshot {
+  id              Int         @id @default(autoincrement())
+  blockNumber     BigInt      @map("block_number")
+  baseFeePerGas   BigInt      @map("base_fee_per_gas")
+  gasUsedRatio    Float       @map("gas_used_ratio")
+  priorityFee10   BigInt      @map("priority_fee_10")
+  priorityFee50   BigInt      @map("priority_fee_50")
+  priorityFee90   BigInt      @map("priority_fee_90")
+  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+}
+
 enum TransactionStatus {
   PENDING
   SUCCESS
