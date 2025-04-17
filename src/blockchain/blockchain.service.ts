@@ -145,4 +145,20 @@ export class BlockchainService {
 
     return Number(ethers.formatEther(feeInWei));
   }
+
+  async getFeeHistory(
+    blockCount: number,
+    percentiles: number[] = [10, 50, 90],
+  ) {
+    try {
+      const hexBlocks = ethers.hexlify(ethers.toBeHex(blockCount));
+      return await this.provider.send('eth_feeHistory', [
+        hexBlocks,
+        'latest',
+        percentiles,
+      ]);
+    } catch (error) {
+      this.handleError(error, 'getFeeHistory');
+    }
+  }
 }
