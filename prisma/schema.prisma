@@ -158,6 +158,8 @@ model FeeSnapshot {
   priorityFee50   BigInt      @map("priority_fee_50")
   priorityFee90   BigInt      @map("priority_fee_90")
   createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@map("fee_snapshot")
 }
 
 enum TransactionStatus {
