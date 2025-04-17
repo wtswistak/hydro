@@ -9,5 +9,7 @@ CREATE TABLE "fee_snapshot" (
     "priority_fee_90" BIGINT NOT NULL,
     "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "fee_snapshot_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "fee_snapshot_pkey" PRIMARY KEY ("created_at","id")
 );
+
+SELECT create_hypertable('fee_snapshot', 'created_at', if_not_exists => TRUE);

@@ -150,7 +150,7 @@ model Blockchain {
 }
 
 model FeeSnapshot {
-  id              Int         @id @default(autoincrement())
+  id              Int         @default(autoincrement())
   blockNumber     BigInt      @map("block_number")
   baseFeePerGas   BigInt      @map("base_fee_per_gas")
   gasUsedRatio    Float       @map("gas_used_ratio")
@@ -159,6 +159,7 @@ model FeeSnapshot {
   priorityFee90   BigInt      @map("priority_fee_90")
   createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
 
+  @@id([createdAt, id])
   @@map("fee_snapshot")
 }
 
