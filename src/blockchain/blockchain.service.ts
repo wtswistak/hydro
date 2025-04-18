@@ -146,10 +146,7 @@ export class BlockchainService {
     return Number(ethers.formatEther(feeInWei));
   }
 
-  async getFeeHistory(
-    blockCount: number,
-    percentiles: number[] = [10, 50, 90],
-  ) {
+  async getFeeHistory(blockCount: number, percentiles: number[]) {
     try {
       const hexBlocks = ethers.hexlify(ethers.toBeHex(blockCount));
       return await this.provider.send('eth_feeHistory', [
