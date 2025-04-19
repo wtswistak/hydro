@@ -22,7 +22,6 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
-RUN npm install --only=production
 EXPOSE 4000
 
 ENTRYPOINT ["./entrypoint.sh"]

@@ -23,8 +23,22 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            cd ~/hydro
-            git pull origin main
+            set -e
+            
+            echo "🛑 Stopping and removing containers..."
             docker-compose down
+
+            echo "🧹 Cleaning up unused Docker images and containers..."
+            docker system prune -af
+
+            echo "🗂️ Checking disk space before update:"
+            df -h
+
+            echo "🔄 Pulling latest code..."
+            git pull origin main
+
+            echo "🚀 Rebuilding and starting Docker containers..."
             docker-compose up --build -d
+
+            echo "✅ Deploy finished successfully!"
           EOF
