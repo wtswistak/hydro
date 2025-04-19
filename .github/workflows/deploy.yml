@@ -24,12 +24,13 @@ jobs:
         run: |
           ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
             set -e
-            
+            cd ~/hydro
+
             echo "🛑 Stopping and removing containers..."
             docker-compose down
 
             echo "🧹 Cleaning up unused Docker images and containers..."
-            docker system prune -af
+            docker system prune -af --volumes
 
             echo "🗂️ Checking disk space before update:"
             df -h
