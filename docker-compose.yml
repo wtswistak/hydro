@@ -1,6 +1,6 @@
 services:
   backend:
-    build: .
+    image: ghcr.io/wtswistak/hydro:latest
     container_name: crypto_backend
     restart: unless-stopped
     ports:
@@ -10,6 +10,7 @@ services:
     environment:
       PORT: 4000
       HOST: 0.0.0.0
+
   postgres:
     image: timescale/timescaledb:latest-pg17
     restart: unless-stopped
