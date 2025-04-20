@@ -1,18 +1,17 @@
 name: Deploy to EC2
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ['Build and Push Docker Image to GHCR']
+    types:
+      - completed
 
 jobs:
   deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
@@ -26,20 +25,14 @@ jobs:
             set -e
             cd ~/hydro
 
-            echo "🛑 Stopping and removing containers..."
+            echo "🔄 Pulling latest image..."
+            docker-compose pull
+
+            echo "🛑 Stopping old containers..."
             docker-compose down
 
-            echo "🧹 Cleaning up unused Docker images and containers..."
-            docker system prune -af --volumes
-
-            echo "🗂️ Checking disk space before update:"
-            df -h
-
-            echo "🔄 Pulling latest code..."
-            git pull origin main
-
-            echo "🚀 Rebuilding and starting Docker containers..."
-            docker-compose up --build -d
+            echo "🚀 Starting new containers..."
+            docker-compose up -d
 
             echo "✅ Deploy finished successfully!"
           EOF
