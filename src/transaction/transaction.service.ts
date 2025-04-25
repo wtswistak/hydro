@@ -159,9 +159,37 @@ export class TransactionService {
     });
   }
 
-  getTxByHash({ hash }: { hash: string }) {
+  getTxByHash({ hash }: { hash: string }): Promise<Transaction> {
     return this.prisma.transaction.findUnique({
       where: { hash },
+    });
+  }
+
+  getTransactionsByUserId({
+    userId,
+  }: {
+    userId: number;
+  }): Promise<Transaction[]> {
+    return this.prisma.transaction.findMany({
+      where: {
+        OR: [
+          { senderBalance: { wallet: { userId } } },
+          { receiverBalance: { wallet: { userId } } },
+        ],
+      },
+      include: {
+        senderBalance: {
+          include: {
+            wallet: true,
+          },
+        },
+        receiverBalance: {
+          include: {
+            wallet: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
     });
   }
 }
