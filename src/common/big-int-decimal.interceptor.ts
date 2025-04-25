@@ -18,6 +18,7 @@ export class BigIntDecimalInterceptor implements NestInterceptor {
     if (data === null || data === undefined) return data;
     if (typeof data === 'bigint') return data.toString();
     if (data instanceof Decimal) return data.toString();
+    if (data instanceof Date) return data;
 
     if (Array.isArray(data)) {
       return data.map((item) => this.transformBigIntDecimal(item));
