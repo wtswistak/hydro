@@ -177,18 +177,6 @@ export class TransactionService {
           { receiverBalance: { wallet: { userId } } },
         ],
       },
-      include: {
-        senderBalance: {
-          include: {
-            wallet: true,
-          },
-        },
-        receiverBalance: {
-          include: {
-            wallet: true,
-          },
-        },
-      },
       orderBy: { createdAt: 'desc' },
     });
   }

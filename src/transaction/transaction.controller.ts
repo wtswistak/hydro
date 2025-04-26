@@ -37,7 +37,6 @@ export class TransactionController {
   @UseGuards(AuthGuard('jwt'))
   getTransactions(@Req() req: AuthRequest): Promise<Transaction[]> {
     const userId = req.user.id;
-    console.log('userId', userId);
     return this.transactionService.getTransactionsByUserId({ userId });
   }
 }
