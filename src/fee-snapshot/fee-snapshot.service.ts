@@ -33,4 +33,12 @@ export class FeeSnapshotService {
       skipDuplicates: true,
     });
   }
+
+  getLastFeeSnapshot() {
+    return this.prisma.feeSnapshot.findFirst({
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
 }
