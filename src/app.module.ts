@@ -17,6 +17,7 @@ import { WebhookModule } from './webhook/webhook.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronService } from './cron/cron.service';
 import { FeeSnapshotModule } from './fee-snapshot/fee-snapshot.module';
+import { FeePredictionModule } from './fee-prediction/fee-prediction.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { FeeSnapshotModule } from './fee-snapshot/fee-snapshot.module';
     WebhookModule,
     ScheduleModule.forRoot(),
     FeeSnapshotModule,
+    FeePredictionModule,
   ],
   providers: [MailersendService, CronService],
 })
