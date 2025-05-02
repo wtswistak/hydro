@@ -34,11 +34,12 @@ export class FeeSnapshotService {
     });
   }
 
-  getLastFeeSnapshot() {
-    return this.prisma.feeSnapshot.findFirst({
+  getLastFeeSnapshots({ take = 1 }: { take?: number }) {
+    return this.prisma.feeSnapshot.findMany({
       orderBy: {
         createdAt: 'desc',
       },
+      take,
     });
   }
 }
