@@ -5,7 +5,7 @@ import { FeePredictionService } from './fee-prediction.service';
 export class FeePredictionController {
   constructor(private readonly feePredictionService: FeePredictionService) {}
   @Get()
-  getFeePrediction(): Promise<number> {
+  getFeePrediction(): Promise<string> {
     return this.feePredictionService.getFeePrediction();
   }
 }

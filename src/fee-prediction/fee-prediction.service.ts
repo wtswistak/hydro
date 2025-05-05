@@ -1,4 +1,5 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { formatEther, parseUnits } from 'ethers';
 import * as ort from 'onnxruntime-node';
 import { FeeSnapshotService } from 'src/fee-snapshot/fee-snapshot.service';
 
@@ -15,7 +16,7 @@ export class FeePredictionService implements OnModuleInit {
     this.logger.log('ONNX model loaded successfully ✅');
   }
 
-  async getFeePrediction(): Promise<number> {
+  async getFeePrediction(): Promise<string> {
     const snapshots = await this.feeSnapshotService.getLastFeeSnapshots({
       take: 5,
     });
@@ -55,9 +56,11 @@ export class FeePredictionService implements OnModuleInit {
     // predykcja
     const results = await this.session.run(feeds);
 
-    // jedyny output ma zwykle nazwę 'output'
-    const predictedFee = results.output.data[0] as number; // w gwei
+    const outName = Object.keys(results)[0];
+    const gasPriceGwei = (results[outName].data as Float32Array)[0].toFixed(9);
+    const gasPriceWei = parseUnits(gasPriceGwei.toString(), 'gwei');
+    const gasPriceEth = formatEther(gasPriceWei);
 
-    return predictedFee;
+    return gasPriceEth;
   }
 }
