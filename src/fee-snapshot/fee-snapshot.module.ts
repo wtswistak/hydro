@@ -7,6 +7,6 @@ import { AppConfigService } from 'src/config/app-config.service';
 @Module({
   providers: [FeeSnapshotService, BlockchainService, AppConfigService],
   controllers: [FeeSnapshotController],
-  exports: [FeeSnapshotService],
+  exports: [FeeSnapshotService, BlockchainService, AppConfigService],
 })
 export class FeeSnapshotModule {}
