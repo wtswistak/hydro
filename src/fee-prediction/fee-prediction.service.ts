@@ -1,18 +1,18 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import * as ort from 'onnxruntime-node';
 import { FeeSnapshotService } from 'src/fee-snapshot/fee-snapshot.service';
 
 @Injectable()
 export class FeePredictionService implements OnModuleInit {
   private session!: ort.InferenceSession;
-
+  private readonly logger = new Logger(FeePredictionService.name);
   constructor(private readonly feeSnapshotService: FeeSnapshotService) {}
 
   async onModuleInit() {
     this.session = await ort.InferenceSession.create(
-      './models/eth_fee_model_v2.onnx',
+      './src/ml-models/eth_fee_model_v2.onnx',
     );
-    console.log('✅ ONNX model załadowany');
+    this.logger.log('ONNX model loaded successfully ✅');
   }
 
   async getFeePrediction(): Promise<number> {
