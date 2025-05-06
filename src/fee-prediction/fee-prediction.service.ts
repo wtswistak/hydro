@@ -1,5 +1,5 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { formatEther, parseUnits } from 'ethers';
+import { formatEther } from 'ethers';
 import * as ort from 'onnxruntime-node';
 import { FeeSnapshotService } from 'src/fee-snapshot/fee-snapshot.service';
 
@@ -16,51 +16,70 @@ export class FeePredictionService implements OnModuleInit {
     this.logger.log('ONNX model loaded successfully ✅');
   }
 
-  async getFeePrediction(): Promise<string> {
-    const snapshots = await this.feeSnapshotService.getLastFeeSnapshots({
+  async getFeePrediction(steps = 6) {
+    let snapshots = await this.feeSnapshotService.getLastFeeSnapshots({
       take: 5,
     });
 
-    const latest = snapshots[0];
+    const forecasts: {
+      minutesAhead: number;
+      gasPriceGwei: number;
+      txCostEth: string;
+    }[] = [];
 
-    /* rolling‑mean i std z ostatnich 5 snapshotów */
-    const baseFeeArr = snapshots.map((s) => Number(s.baseFeePerGas));
-    const baseFeeMean5 =
-      baseFeeArr.reduce((sum, v) => sum + v, 0) / baseFeeArr.length;
+    for (let i = 1; i <= steps; i++) {
+      const latest = snapshots[0];
 
-    const baseFeeStd5 = Math.sqrt(
-      baseFeeArr
-        .map((v) => Math.pow(v - baseFeeMean5, 2))
-        .reduce((s, v) => s + v, 0) / baseFeeArr.length,
-    );
+      const baseFeeArr = snapshots.map((s) => Number(s.baseFeePerGas));
+      const baseFeeMean5 =
+        baseFeeArr.reduce((s, v) => s + v, 0) / baseFeeArr.length;
+      const baseFeeStd5 = Math.sqrt(
+        baseFeeArr
+          .map((v) => (v - baseFeeMean5) ** 2)
+          .reduce((s, v) => s + v, 0) / baseFeeArr.length,
+      );
+      const priorityGap =
+        Number(latest.priorityFee90) - Number(latest.priorityFee10);
 
-    /* różnica między 90‑ a 10‑percentylem tipów */
-    const priorityGap =
-      Number(latest.priorityFee90) - Number(latest.priorityFee10);
+      const input = Float32Array.from([
+        Number(latest.baseFeePerGas),
+        latest.gasUsedRatio,
+        Number(latest.priorityFee10),
+        Number(latest.priorityFee50),
+        Number(latest.priorityFee90),
+        baseFeeMean5,
+        baseFeeStd5,
+        priorityGap,
+      ]);
 
-    /* budowa dokładnie 8‑elementowy wektor cech  */
-    const inputVector = Float32Array.from([
-      Number(latest.baseFeePerGas),
-      latest.gasUsedRatio,
-      Number(latest.priorityFee10),
-      Number(latest.priorityFee50),
-      Number(latest.priorityFee90),
-      baseFeeMean5,
-      baseFeeStd5,
-      priorityGap,
-    ]);
+      const feeds = { float_input: new ort.Tensor('float32', input, [1, 8]) };
+      const results = await this.session.run(feeds);
+      const outName = Object.keys(results)[0];
+      const rawPred = (results[outName].data as Float32Array)[0];
+      const gasPriceGwei = Number(rawPred.toFixed(6));
 
-    const tensor = new ort.Tensor('float32', inputVector, [1, 8]);
-    const feeds = { float_input: tensor }; // nazwa musi odpowiadać initial_type
+      const gasPriceWeiBig = BigInt(Math.round(gasPriceGwei * 1e9));
+      const gasLimitBig = BigInt(21_000);
+      const txCostWeiBig = gasPriceWeiBig * gasLimitBig;
 
-    // predykcja
-    const results = await this.session.run(feeds);
+      const txCostEth = formatEther(txCostWeiBig);
 
-    const outName = Object.keys(results)[0];
-    const gasPriceGwei = (results[outName].data as Float32Array)[0].toFixed(9);
-    const gasPriceWei = parseUnits(gasPriceGwei.toString(), 'gwei');
-    const gasPriceEth = formatEther(gasPriceWei);
+      forecasts.push({
+        minutesAhead: i * 10,
+        gasPriceGwei,
+        txCostEth,
+      });
 
-    return gasPriceEth;
+      // synulacja nowy snapshot
+      const synthetic: typeof latest = {
+        ...latest,
+        baseFeePerGas: BigInt(Math.round(gasPriceGwei * 1e9)),
+        createdAt: new Date(latest.createdAt.getTime() + 10 * 60 * 1000),
+      };
+
+      snapshots = [synthetic, ...snapshots].slice(0, 5);
+    }
+
+    return forecasts;
   }
 }
