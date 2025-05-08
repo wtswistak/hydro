@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { BaseException } from 'src/exception/base-exception';
+import { BaseException } from 'src/common/exception/base-exception';
 
 export class WalletExistsException extends BaseException {
   constructor() {
