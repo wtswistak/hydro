@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { formatEther } from 'ethers';
 import * as ort from 'onnxruntime-node';
 import { FeeSnapshotService } from 'src/fee-snapshot/fee-snapshot.service';
+import { FeePrediction } from './interface/get-fee-prediction.dto';
 
 @Injectable()
 export class FeePredictionService implements OnModuleInit {
@@ -16,7 +17,7 @@ export class FeePredictionService implements OnModuleInit {
     this.logger.log('ONNX model loaded successfully ✅');
   }
 
-  async getFeePrediction(steps = 6) {
+  async getFeePrediction(steps: number): Promise<FeePrediction[]> {
     let snapshots = await this.feeSnapshotService.getLastFeeSnapshots({
       take: 5,
     });
