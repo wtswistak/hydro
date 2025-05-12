@@ -11,7 +11,7 @@ import { MarketChartDto } from './dto/market-chart.dto';
 import { MarketChart } from './interface/market-chart-response';
 import { Cryptocurrency } from './interface/cryptocurrency.interface';
 import { convertKeysToCamel } from 'src/utils/convert-to-camel';
-import { FIAT_CURRENCY } from 'src/common/constant';
+import { FIAT_CURRENCY } from 'src/utils/constant';
 import Redis from 'ioredis';
 
 @Injectable()
