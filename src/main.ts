@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/exception/http-exceptions.filter';
 import { AppConfigService } from './config/app-config.service';
-import { ApiKeyGuard } from './middleware/api-key.guard';
+import { ApiKeyGuard } from './common/guard/api-key.guard';
 import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
