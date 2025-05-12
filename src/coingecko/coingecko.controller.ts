@@ -10,7 +10,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { MarketChartDto } from './dto/market-chart.dto';
 import { MarketChart } from './interface/market-chart-response';
 import { Cryptocurrency } from './interface/cryptocurrency.interface';
-import { BigIntInterceptor } from 'src/common/big-int.interceptor';
+import { BigIntInterceptor } from 'src/common/interceptor/big-int.interceptor';
 
 @Controller('coingecko')
 export class CoingeckoController {

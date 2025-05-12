@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { AuthGuard } from '@nestjs/passport';
-import { BigIntInterceptor } from 'src/common/big-int.interceptor';
+import { BigIntInterceptor } from 'src/common/interceptor/big-int.interceptor';
 import { AuthRequest } from 'src/utils/interface';
 import { CreateTxDto } from 'src/wallet/dto/create-tx.dto';
 import { Transaction } from '@prisma/client';
