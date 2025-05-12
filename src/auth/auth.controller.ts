@@ -18,7 +18,7 @@ import { plainToClass } from 'class-transformer';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { Response } from 'express';
-import { REFRESH_TOKEN_EXPIRES_TIME } from 'src/utils/constant';
+import { REFRESH_TOKEN_EXPIRES_TIME } from 'src/common/constant';
 import { AuthRequest } from 'src/utils/interface';
 
 @Controller('auth')

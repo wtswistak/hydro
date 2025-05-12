@@ -14,7 +14,7 @@ import { LoginResponseDto } from './dto/login-response.dto';
 import { NotificationService } from 'src/notification/notification.service';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { AppConfigService } from 'src/config/app-config.service';
-import { REFRESH_TOKEN_EXPIRES_TIME } from 'src/utils/constant';
+import { REFRESH_TOKEN_EXPIRES_TIME } from 'src/common/constant';
 import { CreateToken, JWTTokens, TokenPayload } from './interface';
 
 @Injectable()
