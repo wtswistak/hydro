@@ -12,7 +12,7 @@ export class FeePredictionService implements OnModuleInit {
 
   async onModuleInit() {
     this.session = await ort.InferenceSession.create(
-      './src/ml-models/eth_fee_model_v2.onnx',
+      './src/fee-prediction/ml-models/eth_fee_model_v2.onnx',
     );
     this.logger.log('ONNX model loaded successfully ✅');
   }
