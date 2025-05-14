@@ -26,7 +26,7 @@ jobs:
             cd ~/hydro
 
             echo "🧹 Cleaning up unused Docker data..."
-            docker system prune -f
+            docker system prune -af
 
             echo "🔄 Pulling latest image..."
             docker-compose pull
