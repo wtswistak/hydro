@@ -56,4 +56,7 @@ export class AppConfigService {
   get redisPort(): number {
     return this.configService.get<number>('REDIS_PORT');
   }
+  get feePredictionApiUrl(): string {
+    return this.configService.get<string>('FEE_PREDICTION_API_URL');
+  }
 }
