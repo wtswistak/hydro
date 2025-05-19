@@ -8,6 +8,6 @@ export class FeePredictionController {
 
   @Get()
   getFeePrediction(): Promise<FeePrediction[]> {
-    return this.feePredictionService.getFeePrediction(6);
+    return this.feePredictionService.getFeePrediction();
   }
 }
