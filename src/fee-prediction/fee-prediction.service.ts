@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { FeeSnapshotService } from 'src/fee-snapshot/fee-snapshot.service';
-import { FeePrediction } from './interface/get-fee-prediction.dto';
+import { FeePrediction } from './interface/get-fee-prediction.interface';
 import { FeePredictionApiService } from './fee-prediction-api.service';
 
 @Injectable()
@@ -11,7 +11,7 @@ export class FeePredictionService {
     private readonly feePredictionApiService: FeePredictionApiService,
   ) {}
 
-  async getFeePrediction(): Promise<FeePrediction[]> {
+  async getFeePrediction() {
     let snapshots = await this.feeSnapshotService.getLastFeeSnapshots({
       take: 5,
     });
@@ -38,10 +38,14 @@ export class FeePredictionService {
       priorityGap,
     ];
 
-    const prediction =
+    return this.formatFeePrediction(features);
+  }
+
+  async formatFeePrediction(features: number[]): Promise<FeePrediction[]> {
+    const feePrediction =
       await this.feePredictionApiService.getFeePrediction(features);
 
-    return prediction.map((gwei, i) => ({
+    return feePrediction.map((gwei, i) => ({
       minutesAhead: (i + 1) * 10,
       gasPriceGwei: +gwei.toFixed(6),
     }));

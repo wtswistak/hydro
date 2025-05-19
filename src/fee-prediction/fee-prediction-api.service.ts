@@ -6,10 +6,10 @@ import { firstValueFrom } from 'rxjs';
 export class FeePredictionApiService {
   private readonly logger = new Logger(FeePredictionApiService.name);
   constructor(private readonly httpService: HttpService) {}
-  async getFeePrediction(features: number[]): Promise<number[]> {
+  async getFeePrediction(features: number[]) {
     try {
       const { data } = await firstValueFrom(
-        this.httpService.post('predict', {
+        this.httpService.post<number[]>('predict', {
           features,
         }),
       );
