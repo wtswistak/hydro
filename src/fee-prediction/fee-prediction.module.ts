@@ -16,6 +16,9 @@ import { FeePredictionApiService } from './fee-prediction-api.service';
         baseURL: configService.feePredictionApiUrl,
         timeout: configService.httpTimeout,
         maxRedirects: configService.maxRedirects,
+        headers: {
+          'x-api-key': configService.feePredictionApiKey,
+        },
       }),
       inject: [AppConfigService],
     }),

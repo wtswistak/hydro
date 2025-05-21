@@ -59,4 +59,7 @@ export class AppConfigService {
   get feePredictionApiUrl(): string {
     return this.configService.get<string>('FEE_PREDICTION_API_URL');
   }
+  get feePredictionApiKey(): string {
+    return this.configService.get<string>('FEE_PREDICTION_API_KEY');
+  }
 }
