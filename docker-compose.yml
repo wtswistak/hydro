@@ -31,5 +31,14 @@ services:
     ports:
       - '4002:6379'
 
+  predict-service:
+    image: ghcr.io/wtswistak/fee-predictor:latest
+    container_name: fee_predict
+    restart: unless-stopped
+    ports:
+      - '9000:9000'
+    environment:
+      API_KEY: ${FEE_PREDICTION_API_KEY}
+
 volumes:
   postgres_data:
