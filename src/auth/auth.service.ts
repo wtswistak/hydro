@@ -79,7 +79,7 @@ export class AuthService {
     });
 
     this.logger.log(`Sending verification email to ${email}`);
-    this.notificationService.sendVerificationEmail({
+    await this.notificationService.sendVerificationEmailByBrevo({
       email,
       token: verificationToken,
     });
