@@ -62,4 +62,10 @@ export class AppConfigService {
   get feePredictionApiKey(): string {
     return this.configService.get<string>('FEE_PREDICTION_API_KEY');
   }
+  get brevoApiUrl(): string {
+    return this.configService.get<string>('BREVO_API_URL');
+  }
+  get brevoApiKey(): string {
+    return this.configService.get<string>('BREVO_API_KEY');
+  }
 }
