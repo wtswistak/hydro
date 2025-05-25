@@ -12,6 +12,8 @@ export class BrevoApiService {
     if (data?.error) {
       this.logger.error(`Brevo API error in ${message}`);
       this.logger.error(`Error: ${data.error}, Status: ${status}`);
+    } else if (data?.message) {
+      this.logger.error(`Brevo API error in ${data.message}`);
     } else {
       this.logger.error(`Unknown error:', ${error}`);
     }
