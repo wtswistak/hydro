@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { MailersendService } from './mailersend.service';
 import { SendVerificationEmail } from './interface/send-verification-email.interface';
 import { BrevoApiService } from './brevo-api.service';
+import { AppConfigService } from 'src/config/app-config.service';
 
 @Injectable()
 export class NotificationService {
@@ -9,10 +10,11 @@ export class NotificationService {
   constructor(
     private readonly mailersendService: MailersendService,
     private readonly brevoApiService: BrevoApiService,
+    private readonly appConfigService: AppConfigService,
   ) {}
 
   sendVerificationEmail({ email, token }: SendVerificationEmail) {
-    const verificationLink = `http://localhost:3000/auth/verify-email?token=${token}`;
+    const verificationLink = `${this.appConfigService.apiUrl}/auth/verify-email?token=${token}`;
     this.mailersendService.sendEmail({
       receipent: email,
       subject: 'Verify your email',
@@ -21,7 +23,7 @@ export class NotificationService {
   }
 
   async sendVerificationEmailByBrevo({ email, token }: SendVerificationEmail) {
-    const verificationLink = `http://localhost:3000/auth/verify-email?token=${token}`;
+    const verificationLink = `${this.appConfigService.apiUrl}/auth/verify-email?token=${token}`;
     const html = `
       <h1>Hello</h1>
       <p>Click the link below to verify your email:</p>

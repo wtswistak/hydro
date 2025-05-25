@@ -68,4 +68,7 @@ export class AppConfigService {
   get brevoApiKey(): string {
     return this.configService.get<string>('BREVO_API_KEY');
   }
+  get apiUrl(): string {
+    return this.configService.get<string>('API_URL');
+  }
 }
