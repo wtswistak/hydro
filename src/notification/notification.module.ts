@@ -3,11 +3,13 @@ import { NotificationService } from './notification.service';
 import { MailersendService } from './mailersend.service';
 import { AppConfigService } from 'src/config/app-config.service';
 import { HttpModule } from '@nestjs/axios';
+import { AppConfigModule } from 'src/config/app-config.module';
+import { BrevoApiService } from './brevo-api.service';
 
 @Module({
   imports: [
     HttpModule.registerAsync({
-      imports: [AppConfigService],
+      imports: [AppConfigModule],
       useFactory: async (configService: AppConfigService) => ({
         baseURL: configService.brevoApiUrl,
         timeout: configService.httpTimeout,
@@ -20,7 +22,12 @@ import { HttpModule } from '@nestjs/axios';
       inject: [AppConfigService],
     }),
   ],
-  providers: [AppConfigService, NotificationService, MailersendService],
+  providers: [
+    AppConfigService,
+    NotificationService,
+    MailersendService,
+    BrevoApiService,
+  ],
   exports: [NotificationService, MailersendService],
 })
 export class NotificationModule {}
