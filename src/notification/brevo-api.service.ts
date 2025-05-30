@@ -32,9 +32,9 @@ export class BrevoApiService {
   }) {
     try {
       const { data } = await firstValueFrom(
-        this.httpService.post('/v3/smtp/email', {
+        this.httpService.post('/smtp/email', {
           sender: {
-            email: 'noreply@example.com',
+            email: 'wolleazy@gmail.com',
           },
           to: [
             {
