@@ -71,4 +71,7 @@ export class AppConfigService {
   get apiUrl(): string {
     return this.configService.get<string>('API_URL');
   }
+  get frontendUrl(): string {
+    return this.configService.get<string>('FRONTEND_URL');
+  }
 }
