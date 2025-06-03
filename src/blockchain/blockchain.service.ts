@@ -12,7 +12,7 @@ export interface EstimatedFee {
 
 @Injectable()
 export class BlockchainService {
-  private readonly provider = new JsonRpcProvider();
+  private readonly provider: JsonRpcProvider;
   private readonly privateWallet: ethers.Wallet;
   private readonly logger = new Logger(BlockchainService.name);
 

@@ -198,7 +198,7 @@ export class AuthService {
     if (!token) {
       throw new UnauthorizedException('Invalid refresh token');
     }
-    this.prisma.sessionToken.update({
+    await this.prisma.sessionToken.update({
       where: { token: refreshToken },
       data: {
         revokedAt: new Date(),
