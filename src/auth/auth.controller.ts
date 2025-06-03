@@ -57,7 +57,7 @@ export class AuthController {
       maxAge: REFRESH_TOKEN_EXPIRES_TIME,
     });
 
-    res.json(tokens);
+    res.json(tokens.accessToken);
   }
 
   @Patch('change-password')
