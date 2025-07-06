@@ -7,18 +7,18 @@ export class CronService {
   private readonly logger = new Logger(CronService.name);
   constructor(private readonly feeSnapshotService: FeeSnapshotService) {}
 
-  @Cron(CronExpression.EVERY_30_MINUTES)
-  async createFeeSnapshot() {
-    this.logger.log('Creating fee snapshot...');
-    const startTime = Date.now();
-    try {
-      await this.feeSnapshotService.createFeeSnapshotJob();
-      const duration = (Date.now() - startTime) / 1000;
-      this.logger.log(
-        `Fee snapshot created successfully in ${duration} seconds`,
-      );
-    } catch (error) {
-      this.logger.error('Error creating fee snapshot', error);
-    }
-  }
+  // @Cron(CronExpression.EVERY_30_MINUTES)
+  // async createFeeSnapshot() {
+  //   this.logger.log('Creating fee snapshot...');
+  //   const startTime = Date.now();
+  //   try {
+  //     await this.feeSnapshotService.createFeeSnapshotJob();
+  //     const duration = (Date.now() - startTime) / 1000;
+  //     this.logger.log(
+  //       `Fee snapshot created successfully in ${duration} seconds`,
+  //     );
+  //   } catch (error) {
+  //     this.logger.error('Error creating fee snapshot', error);
+  //   }
+  // }
 }
