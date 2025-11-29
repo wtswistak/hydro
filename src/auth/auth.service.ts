@@ -248,4 +248,10 @@ export class AuthService {
       },
     });
   }
+
+  getMe(userId: number): Promise<User> {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+  }
 }

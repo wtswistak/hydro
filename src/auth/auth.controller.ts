@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Patch,
   Post,
@@ -47,6 +48,13 @@ export class AuthController {
     });
 
     res.json({ accessToken: tokens.accessToken });
+  }
+
+  @Get('me')
+  @UseGuards(AuthGuard('jwt'))
+  async getMe(@Req() req: AuthRequest) {
+    const userId = req.user.id;
+    return this.authService.getMe(userId);
   }
 
   @Post('refresh')
