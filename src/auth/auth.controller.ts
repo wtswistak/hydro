@@ -39,11 +39,14 @@ export class AuthController {
     const tokens = await this.authService.login(loginDto);
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
+      // sameSite: 'none', try if not working
+      secure: process.env.NODE === 'production',
       sameSite: 'strict',
       maxAge: REFRESH_TOKEN_EXPIRES_TIME,
+      path: '/',
     });
 
-    res.json(tokens);
+    res.json({ accessToken: tokens.accessToken });
   }
 
   @Post('refresh')
@@ -57,7 +60,7 @@ export class AuthController {
       maxAge: REFRESH_TOKEN_EXPIRES_TIME,
     });
 
-    res.json(tokens.accessToken);
+    res.json({ accessToken: tokens.accessToken });
   }
 
   @Patch('change-password')
