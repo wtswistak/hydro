@@ -123,4 +123,9 @@ export class WalletService {
     }
     return wallet;
   }
+
+  async getWallets({ userId }: { userId: number }) {
+    this.logger.log(`Getting wallets for user with id: ${userId}`);
+    return this.walletRepository.getWallets({ userId });
+  }
 }

@@ -30,4 +30,34 @@ export class WalletRepository {
       where: { address },
     });
   }
+
+  getWallets({ userId }: { userId: number }) {
+    return this.prisma.wallet.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        address: true,
+        blockchain: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        balances: {
+          select: {
+            id: true,
+            amount: true,
+            cryptoToken: {
+              select: {
+                id: true,
+                symbol: true,
+                name: true,
+                decimals: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
 }

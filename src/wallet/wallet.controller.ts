@@ -38,4 +38,21 @@ export class WalletController {
       ...EstimatedFeeDto,
     });
   }
+
+  @Get('all')
+  @UseGuards(AuthGuard('jwt'))
+  async getAllWallets(@Req() req: AuthRequest) {
+    const userId = req.user.id;
+    const wallets = await this.walletService.getWallets({ userId });
+    return wallets.map((wallet) => ({
+      id: wallet.id,
+      address: wallet.address,
+      blockchain: wallet.blockchain,
+      balances: wallet.balances.map((balance) => ({
+        id: balance.id,
+        amount: balance.amount ? balance.amount.toString() : null,
+        token: balance.cryptoToken,
+      })),
+    }));
+  }
 }
