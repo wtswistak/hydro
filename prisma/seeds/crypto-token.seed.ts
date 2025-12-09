@@ -10,12 +10,22 @@ export async function seedCryptoToken() {
   const blockchain = await prisma.blockchain.findUnique({
     where: { chainId: 1 },
   });
-  await prisma.cryptoToken.create({
-    data: {
-      name: 'Ethereum',
-      symbol: 'ETH',
-      decimals: 8,
-      blockchainId: blockchain.id,
-    },
+  await prisma.cryptoToken.createMany({
+    data: [
+      {
+        name: 'Ethereum',
+        symbol: 'ETH',
+        decimals: 18,
+        blockchainId: blockchain.id,
+      },
+      {
+        name: 'USD Coin',
+        symbol: 'USDC',
+        decimals: 6,
+        contractAddress: '0xf08a50178dfcde18524640ea6618a1f965821715', // Sepolia USDC
+        blockchainId: blockchain.id,
+      },
+    ],
+    skipDuplicates: true,
   });
 }
