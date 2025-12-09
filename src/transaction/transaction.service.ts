@@ -89,8 +89,10 @@ export class TransactionService {
 
       const blockchainTx = await this.blockchainService.sendTransaction({
         receiverAddress,
-        amount,
+        amount: amount.toString(),
         privateKey: decryptedPrivateKey,
+        contractAddress: cryptoToken.contractAddress,
+        decimals: cryptoToken.decimals,
       });
 
       const tx = await this.createTx(

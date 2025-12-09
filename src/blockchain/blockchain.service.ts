@@ -1,5 +1,6 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { ethers, JsonRpcProvider } from 'ethers';
+import { ERC20_ABI } from './erc20.abi';
 import { AppConfigService } from 'src/config/app-config.service';
 import { SendTransactionDto } from './dto/send-transaction.dto';
 import { GetEstimatedFeeDto } from 'src/wallet/dto/get-estimated-fee.dto';
@@ -65,13 +66,33 @@ export class BlockchainService {
    *   value: 200000000000000n: Wartość transakcji (0.0002 ETH w wei).
    *   chainId: 11155111n: Identyfikator łańcucha Sepolia.
    */
-  async sendTransaction({ receiverAddress, amount, privateKey }) {
+  async sendTransaction({
+    receiverAddress,
+    amount,
+    privateKey,
+    contractAddress,
+    decimals,
+  }: SendTransactionPayload) {
     try {
       const wallet = new ethers.Wallet(privateKey, this.provider);
-      const tx = await wallet.sendTransaction({
-        to: receiverAddress,
-        value: ethers.parseEther(amount.toString()),
-      });
+
+      let tx;
+      if (contractAddress) {
+        const contract = new ethers.Contract(
+          contractAddress,
+          ERC20_ABI,
+          wallet,
+        );
+        const amountInUnits = ethers.parseUnits(amount, decimals);
+
+        tx = await contract.transfer(receiverAddress, amountInUnits);
+      } else {
+        tx = await wallet.sendTransaction({
+          to: receiverAddress,
+          value: ethers.parseEther(amount),
+        });
+      }
+
       console.log(tx);
 
       this.logger.log(`Transaction sent to blockchain with hash: ${tx.hash}`);
@@ -80,7 +101,7 @@ export class BlockchainService {
         blockNumber: tx.blockNumber,
         to: tx.to,
         from: tx.from,
-        value: ethers.formatEther(tx.value),
+        value: tx.value ? ethers.formatEther(tx.value) : '0', // ETH value could be 0 for token transfer
         gasLimit: tx.gasLimit,
         nonce: tx.nonce,
       };
