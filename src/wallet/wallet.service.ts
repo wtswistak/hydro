@@ -106,14 +106,7 @@ export class WalletService {
     { address }: { address: string },
     prisma: PrismaClient = this.prisma,
   ): Promise<Wallet> {
-    const wallet = await this.walletRepository.getWalletByAddress(
-      { address },
-      prisma,
-    );
-    if (!wallet) {
-      throw new WalletNotExistsException();
-    }
-    return wallet;
+    return this.walletRepository.getWalletByAddress({ address }, prisma);
   }
 
   async getWalletByUserId({ userId }: { userId: number }): Promise<Wallet> {
