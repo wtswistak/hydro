@@ -60,4 +60,19 @@ export class WalletRepository {
       },
     });
   }
+
+  getWalletByUserAndBlockchain({
+    userId,
+    blockchainId,
+  }: {
+    userId: number;
+    blockchainId: number;
+  }) {
+    return this.prisma.wallet.findFirst({
+      where: {
+        userId,
+        blockchainId,
+      },
+    });
+  }
 }
