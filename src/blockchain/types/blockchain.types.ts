@@ -5,3 +5,11 @@ export interface SendTransactionPayload {
   contractAddress?: string | null;
   decimals?: number;
 }
+
+export interface EstimatedFeePayload {
+  receiverAddress: string;
+  amount: string;
+  contractAddress?: string | null;
+  decimals: number;
+  senderAddress?: string;
+}

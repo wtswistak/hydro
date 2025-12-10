@@ -3,7 +3,10 @@ import { ethers, JsonRpcProvider } from 'ethers';
 import { ERC20_ABI } from './erc20.abi';
 import { AppConfigService } from 'src/config/app-config.service';
 import { SendTransactionDto } from './dto/send-transaction.dto';
-import { GetEstimatedFeeDto } from 'src/wallet/dto/get-estimated-fee.dto';
+import {
+  EstimatedFeePayload,
+  SendTransactionPayload,
+} from './types/blockchain.types';
 
 export interface EstimatedFee {
   estimatedGas: string;
@@ -140,13 +143,45 @@ export class BlockchainService {
   async estimateFee({
     receiverAddress,
     amount,
-  }: GetEstimatedFeeDto): Promise<EstimatedFee> {
+    contractAddress,
+    decimals,
+    senderAddress,
+  }: EstimatedFeePayload): Promise<EstimatedFee> {
     try {
-      const estimatedGas = await this.provider.estimateGas({
-        to: receiverAddress,
-        value: ethers.parseEther(amount.toString()),
-      });
-      const gasPrice = (await this.provider.getFeeData()).gasPrice;
+      let estimatedGas: bigint;
+      const feeData = await this.provider.getFeeData();
+      const gasPrice = feeData.gasPrice || feeData.maxFeePerGas;
+
+      if (contractAddress) {
+        // simulate ERC20 transfer for gas estimation
+        const contract = new ethers.Contract(
+          contractAddress,
+          ERC20_ABI,
+          this.provider,
+        );
+        const amountInUnits = ethers.parseUnits(amount, decimals);
+        try {
+          const overrides = senderAddress ? { from: senderAddress } : {};
+          estimatedGas = await contract.transfer.estimateGas(
+            receiverAddress,
+            amountInUnits,
+            overrides,
+          );
+        } catch (error) {
+          estimatedGas = BigInt(65000); // default for ERC20 transfer
+          this.logger.warn(
+            `Failed to estimate gas for ERC20 transfer, using default: ${estimatedGas}`,
+          );
+        }
+      }
+
+      if (!contractAddress) {
+        estimatedGas = await this.provider.estimateGas({
+          to: receiverAddress,
+          value: ethers.parseEther(amount.toString()),
+          from: senderAddress,
+        });
+      }
 
       const feeInWei = estimatedGas * BigInt(gasPrice);
       const feeInEth = ethers.formatEther(feeInWei);

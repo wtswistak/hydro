@@ -13,6 +13,8 @@ import { WalletNotExistsException } from './exception/wallet-not-exist.exception
 import { GetEstimatedFeeDto } from './dto/get-estimated-fee.dto';
 import { WalletRepository } from './wallet.repository';
 import { PrismaClient } from 'src/database/prisma/prisma.type';
+import { CryptoTokenService } from 'src/crypto-token/crypto-token.service';
+import { CryptoTokenNotExistException } from 'src/crypto-token/exception/token-not-exist.exceptions';
 
 @Injectable()
 export class WalletService {
@@ -22,6 +24,7 @@ export class WalletService {
     private blockchainService: BlockchainService,
     private cryptoService: CryptoService,
     private walletRepository: WalletRepository,
+    private cryptoTokenService: CryptoTokenService,
   ) {}
 
   async createWallet({
@@ -81,12 +84,39 @@ export class WalletService {
   async getEstimatedFee({
     receiverAddress,
     amount,
-  }: GetEstimatedFeeDto): Promise<EstimatedFee> {
+    cryptoSymbol,
+    userId,
+  }: GetEstimatedFeeDto & { userId: number }): Promise<EstimatedFee> {
+    console.log('userId in getEstimatedFee:', cryptoSymbol);
+    const cryptoToken = await this.cryptoTokenService.getCryptoTokenBySymbol({
+      symbol: cryptoSymbol,
+    });
+    this.logger.log(`Getting estimated fee for ${cryptoSymbol}`);
+
+    if (!cryptoToken) {
+      throw new CryptoTokenNotExistException();
+    }
+
+    const wallet = await this.walletRepository.getWalletByUserAndBlockchain({
+      userId,
+      blockchainId: cryptoToken.blockchainId,
+    });
+
+    if (!wallet) {
+      throw new WalletNotExistsException();
+    }
+
     const estimatedFee = await this.blockchainService.estimateFee({
       receiverAddress,
       amount,
+      contractAddress: cryptoToken.contractAddress,
+      decimals: cryptoToken.decimals,
+      senderAddress: wallet.address,
     });
-    this.logger.log(`Estimated fee: ${estimatedFee}`);
+
+    this.logger.log(
+      `Estimated fee for ${cryptoSymbol}: ${estimatedFee.feeInEth} ETH`,
+    );
 
     return estimatedFee;
   }
