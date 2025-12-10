@@ -5,6 +5,7 @@ import { AppConfigService } from 'src/config/app-config.service';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { CryptoService } from './crypto.service';
 import { WalletRepository } from './wallet.repository';
+import { CryptoTokenService } from 'src/crypto-token/crypto-token.service';
 
 @Module({
   controllers: [WalletController],
@@ -14,7 +15,8 @@ import { WalletRepository } from './wallet.repository';
     BlockchainService,
     CryptoService,
     WalletRepository,
+    CryptoTokenService,
   ],
-  exports: [WalletService, WalletRepository],
+  exports: [WalletService, WalletRepository, CryptoTokenService],
 })
 export class WalletModule {}
