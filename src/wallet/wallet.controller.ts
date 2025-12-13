@@ -33,9 +33,12 @@ export class WalletController {
   @UseGuards(AuthGuard('jwt'))
   getEstimatedFee(
     @Query() EstimatedFeeDto: GetEstimatedFeeDto,
+    @Req() req: AuthRequest,
   ): Promise<EstimatedFee> {
+    const userId = req.user.id;
     return this.walletService.getEstimatedFee({
       ...EstimatedFeeDto,
+      userId,
     });
   }
 
@@ -50,7 +53,7 @@ export class WalletController {
       blockchain: wallet.blockchain,
       balances: wallet.balances.map((balance) => ({
         id: balance.id,
-        amount: balance.amount ? balance.amount.toString() : null,
+        amount: balance.amount.toString(),
         token: balance.cryptoToken,
       })),
     }));
