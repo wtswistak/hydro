@@ -1,6 +1,6 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
-import { Prisma, TransactionStatus } from '@prisma/client';
+import { TransactionStatus } from '@prisma/client';
 import { Job } from 'bullmq';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { CoingeckoService } from 'src/coingecko/coingecko.service';
@@ -51,7 +51,7 @@ export class TransactionWorker extends WorkerHost {
       const rate = await this.coingeckoService.getCryptocurrencyRate({
         id: 'ethereum',
       });
-      const fiatFee = ethFee * rate;
+      const fiatFee = ethFee.times(rate);
 
       await this.transactionService.updateTxDetails({
         txId,
@@ -60,8 +60,8 @@ export class TransactionWorker extends WorkerHost {
           blockNumber: receipt.blockNumber,
           gasUsed: receipt.gasUsed,
           gasPrice: receipt.gasPrice,
-          cryptoFee: new Prisma.Decimal(ethFee),
-          fiatFee: new Prisma.Decimal(fiatFee),
+          cryptoFee: ethFee,
+          fiatFee: fiatFee,
         },
       });
 

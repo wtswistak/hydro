@@ -7,6 +7,7 @@ import {
   EstimatedFeePayload,
   SendTransactionPayload,
 } from './types/blockchain.types';
+import { Decimal } from 'decimal.js';
 
 export interface EstimatedFee {
   estimatedGas: string;
@@ -199,7 +200,7 @@ export class BlockchainService {
   calculateFee({ gasPrice, gasUsed }: { gasPrice: bigint; gasUsed: bigint }) {
     const feeInWei = gasPrice * gasUsed;
 
-    return ethers.formatEther(feeInWei);
+    return new Decimal(ethers.formatEther(feeInWei));
   }
 
   async getFeeHistory(blockCount: number, percentiles: number[]) {

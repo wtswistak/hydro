@@ -72,7 +72,7 @@ export class WebhookService {
         const newBalance = await this.balanceService.updateBalance(
           {
             balanceId: receiverBalance.id,
-            amount: activity[0].value,
+            amount: activity[0].value.toString(),
           },
           prismaTx,
         );
@@ -86,7 +86,7 @@ export class WebhookService {
           hash: activity[0].hash,
           senderAddress: activity[0].fromAddress,
           receiverAddress: activity[0].toAddress,
-          amount: new Prisma.Decimal(activity[0].value),
+          amount: activity[0].value.toString(),
           status: TransactionStatus.SUCCESS,
           ...(receiverBalanceId && {
             receiverBalanceId,
@@ -107,14 +107,14 @@ export class WebhookService {
       const rate = await this.coingeckoService.getCryptocurrencyRate({
         id: cryptoToken.name.toLowerCase(),
       });
-      const fiatFee = ethFee * rate;
+      const fiatFee = ethFee.times(rate);
       await this.transactionService.updateTxDetails({
         txId: tx.id,
         data: {
           gasUsed: txReceipt.gasUsed,
           gasPrice: txReceipt.gasPrice,
-          cryptoFee: new Prisma.Decimal(ethFee),
-          fiatFee: new Prisma.Decimal(fiatFee),
+          cryptoFee: ethFee,
+          fiatFee: fiatFee,
         },
       });
       this.logger.log(`Transaction fee details updated for tx id: ${tx.id}`);
