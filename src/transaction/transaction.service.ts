@@ -10,6 +10,7 @@ import { CryptoService } from 'src/wallet/crypto.service';
 import { CreateTxDto } from 'src/wallet/dto/create-tx.dto';
 import { BalanceAmountTooLowException } from 'src/wallet/exception/balance-amount-too-low.exception';
 import { WalletNotMatchException } from 'src/wallet/exception/wallet-not-match.exception';
+import { Decimal } from 'decimal.js';
 import { WalletService } from 'src/wallet/wallet.service';
 
 @Injectable()
@@ -52,11 +53,13 @@ export class TransactionService {
         },
         prismaTx,
       );
-      if (balance.amount < amount) {
+      if (new Decimal(balance.amount.toString()).lt(new Decimal(amount))) {
         throw new BalanceAmountTooLowException();
       }
-      const newSenderBalance = await this.balanceService.updateBalance(
-        { balanceId: balance.id, amount: -amount },
+      const newSenderBalance = await this.balanceService.updateBalance({
+        balanceId: balance.id,
+        amount: new Decimal(amount).negated().toString(),
+      },
         prismaTx,
       );
       this.logger.log(
@@ -74,7 +77,7 @@ export class TransactionService {
           {
             walletId: receiverWallet.id,
             cryptoTokenId: cryptoToken.id,
-            amount: new Prisma.Decimal(amount),
+            amount,
           },
           prismaTx,
         );
@@ -89,7 +92,7 @@ export class TransactionService {
 
       const blockchainTx = await this.blockchainService.sendTransaction({
         receiverAddress,
-        amount: amount.toString(),
+        amount,
         privateKey: decryptedPrivateKey,
         contractAddress: cryptoToken.contractAddress,
         decimals: cryptoToken.decimals,
@@ -145,10 +148,13 @@ export class TransactionService {
     });
   }
 
-  createTx(data: Partial<Transaction>, prisma: PrismaClient = this.prisma) {
+  createTx(
+    data: Prisma.TransactionUncheckedCreateInput,
+    prisma: PrismaClient = this.prisma,
+  ) {
     return prisma.transaction.create({
       data: {
-        amount: new Prisma.Decimal(data.amount),
+        amount: data.amount,
         status: data.status,
         receiverAddress: data.receiverAddress,
         senderAddress: data.senderAddress,

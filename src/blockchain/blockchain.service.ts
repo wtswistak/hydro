@@ -128,7 +128,7 @@ export class BlockchainService {
     try {
       const trx = {
         to,
-        value: ethers.parseEther(amount.toString()),
+        value: ethers.parseEther(amount),
         gasLimit: ethers.hexlify('0x5208'),
         gasPrice: (await this.provider.getFeeData()).gasPrice,
       };
@@ -199,7 +199,7 @@ export class BlockchainService {
   calculateFee({ gasPrice, gasUsed }: { gasPrice: bigint; gasUsed: bigint }) {
     const feeInWei = gasPrice * gasUsed;
 
-    return Number(ethers.formatEther(feeInWei));
+    return ethers.formatEther(feeInWei);
   }
 
   async getFeeHistory(blockCount: number, percentiles: number[]) {

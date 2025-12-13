@@ -63,7 +63,7 @@ export class BalanceService {
       amount,
     }: {
       balanceId: number;
-      amount: number;
+      amount: string;
     },
     prisma: PrismaClient = this.prisma,
   ): Promise<Balance> {
@@ -71,7 +71,7 @@ export class BalanceService {
       where: { id: balanceId },
       data: {
         amount: {
-          increment: new Decimal(amount),
+          increment: amount,
         },
       },
     });
@@ -80,7 +80,15 @@ export class BalanceService {
   }
 
   async upsertBalance(
-    { walletId, cryptoTokenId, amount }: Partial<Balance>,
+    {
+      walletId,
+      cryptoTokenId,
+      amount,
+    }: {
+      walletId: number;
+      cryptoTokenId: number;
+      amount: string;
+    },
     prisma: PrismaClient = this.prisma,
   ): Promise<Balance> {
     this.logger.log(`Upserting balance for wallet with id: ${walletId}`);
