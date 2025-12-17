@@ -87,7 +87,6 @@ export class WalletService {
     cryptoSymbol,
     userId,
   }: GetEstimatedFeeDto & { userId: number }): Promise<EstimatedFee> {
-    console.log('userId in getEstimatedFee:', cryptoSymbol);
     const cryptoToken = await this.cryptoTokenService.getCryptoTokenBySymbol({
       symbol: cryptoSymbol,
     });
