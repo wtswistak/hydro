@@ -65,15 +65,15 @@ export class CoingeckoService {
     }
   }
 
-  async getCryptocurrencyRate({ id }: { id: string }): Promise<number> {
+  async getCryptocurrencyRate({ id }: { id: string }): Promise<string> {
     try {
       const cachedRate = await this.redisClient.get(id);
       if (cachedRate) {
-        return parseFloat(cachedRate);
+        return cachedRate;
       }
       const { data } = await firstValueFrom(
         this.httpService.get(
-          `simple/price?ids=${id}&vs_currencies=${FIAT_CURRENCY}`,
+          `simple/price?symbols=${id}&vs_currencies=${FIAT_CURRENCY}`,
         ),
       );
       const rate = data[id].usd;

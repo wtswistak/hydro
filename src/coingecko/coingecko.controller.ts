@@ -32,7 +32,8 @@ export class CoingeckoController {
   @UseInterceptors(BigIntInterceptor)
   @Get('cryptocurrency/rate/:id')
   @UseGuards(AuthGuard('jwt'))
-  getCryptocurrencyRate(@Param('id') id: string): Promise<number> {
-    return this.coingeckoService.getCryptocurrencyRate({ id });
+  async getCryptocurrencyRate(@Param('id') id: string): Promise<{ rate: string }> {
+    const rate = await this.coingeckoService.getCryptocurrencyRate({ id: id.toLowerCase() });
+    return { rate };
   }
 }
