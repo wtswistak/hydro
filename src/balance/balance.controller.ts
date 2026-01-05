@@ -13,4 +13,11 @@ export class BalanceController {
     const userId = req.user.id;
     return this.balanceService.getBalance({ userId });
   }
+
+  @Get('total')
+  @UseGuards(AuthGuard('jwt'))
+  getTotalBalanceInUsd(@Req() req: AuthRequest): Promise<string> {
+    const userId = req.user.id;
+    return this.balanceService.getTotalBalanceInUsd({ userId });
+  }
 }

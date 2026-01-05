@@ -1,7 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Balance, Prisma } from '@prisma/client';
+import Decimal from 'decimal.js';
 
 import { BlockchainService } from 'src/blockchain/blockchain.service';
+import { CoingeckoService } from 'src/coingecko/coingecko.service';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { PrismaClient } from 'src/database/prisma/prisma.type';
 import { BalanceNotExistException } from 'src/wallet/exception/balance-not-exist.exception';
@@ -14,6 +16,7 @@ export class BalanceService {
     private readonly prisma: PrismaService,
     private readonly walletService: WalletService,
     private readonly blockchainService: BlockchainService,
+    private readonly coingeckoService: CoingeckoService,
   ) {}
 
   async getBalance({ userId }: { userId: number }): Promise<string> {
@@ -28,6 +31,35 @@ export class BalanceService {
     }
 
     return balance;
+  }
+
+  async getTotalBalanceInUsd({ userId }: { userId: number }): Promise<string> {
+    this.logger.log(`Getting total balance in USD for user id: ${userId}`);
+
+    const wallets = await this.prisma.wallet.findMany({
+      where: { userId, deletedAt: null },
+      include: {
+        balances: {
+          where: { deletedAt: null },
+          include: { cryptoToken: true },
+        },
+      },
+    });
+
+    let totalUsd = new Decimal(0);
+
+    for (const wallet of wallets) {
+      for (const balance of wallet.balances) {
+        const symbol = balance.cryptoToken.symbol.toLowerCase();
+        const rate = await this.coingeckoService.getCryptocurrencyRate({
+          id: symbol,
+        });
+        const amountInUsd = new Decimal(balance.amount.toString()).mul(rate);
+        totalUsd = totalUsd.add(amountInUsd);
+      }
+    }
+
+    return totalUsd.toFixed(2);
   }
 
   async getBalanceByWalletId(
