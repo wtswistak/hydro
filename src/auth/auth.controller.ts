@@ -15,6 +15,7 @@ import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { RegisterResponseDto } from './dto/register-response.dto';
+import { MeResponseDto } from './dto/me-response.dto';
 import { plainToClass } from 'class-transformer';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
@@ -52,9 +53,10 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(AuthGuard('jwt'))
-  async getMe(@Req() req: AuthRequest) {
+  async getMe(@Req() req: AuthRequest): Promise<MeResponseDto> {
     const userId = req.user.id;
-    return this.authService.getMe(userId);
+    const user = await this.authService.getMe(userId);
+    return plainToClass(MeResponseDto, user);
   }
 
   @Post('refresh')
