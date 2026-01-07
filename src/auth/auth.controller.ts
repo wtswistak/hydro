@@ -22,10 +22,14 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import { Response } from 'express';
 import { REFRESH_TOKEN_EXPIRES_TIME } from 'src/common/constant';
 import { AuthRequest } from 'src/utils/interface';
+import { AppConfigService } from 'src/config/app-config.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: AppConfigService,
+  ) {}
 
   @Post('register')
   async register(
@@ -42,7 +46,7 @@ export class AuthController {
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       // sameSite: 'none', try if not working
-      secure: process.env.NODE === 'production',
+      secure: this.configService.nodeEnv === 'production',
       sameSite: 'strict',
       maxAge: REFRESH_TOKEN_EXPIRES_TIME,
       path: '/',
@@ -67,6 +71,8 @@ export class AuthController {
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       sameSite: 'strict',
+      secure: this.configService.nodeEnv === 'production',
+      path: '/',
       maxAge: REFRESH_TOKEN_EXPIRES_TIME,
     });
 
