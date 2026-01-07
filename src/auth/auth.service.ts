@@ -16,6 +16,7 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import { AppConfigService } from 'src/config/app-config.service';
 import { REFRESH_TOKEN_EXPIRES_TIME } from 'src/common/constant';
 import { CreateToken, JWTTokens, TokenPayload } from './interface';
+import { EmailNotVerifiedException } from './exception/email-not-verified.exception';
 
 @Injectable()
 export class AuthService {
@@ -101,6 +102,16 @@ export class AuthService {
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new InvalidPasswordException();
+    }
+
+    const isEmailVerified = await this.prisma.emailVerification.findFirst({
+      where: {
+        userId: user.id,
+      },
+    });
+
+    if (!isEmailVerified?.used) {
+      throw new EmailNotVerifiedException();
     }
 
     const tokens = await this.generateTokens({
