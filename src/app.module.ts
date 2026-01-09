@@ -18,6 +18,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { CronService } from './cron/cron.service';
 import { FeeSnapshotModule } from './fee-snapshot/fee-snapshot.module';
 import { FeePredictionModule } from './fee-prediction/fee-prediction.module';
+import { BitcoinModule } from './bitcoin/bitcoin.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { FeePredictionModule } from './fee-prediction/fee-prediction.module';
     ScheduleModule.forRoot(),
     FeeSnapshotModule,
     FeePredictionModule,
+    BitcoinModule,
   ],
   providers: [MailersendService, CronService],
 })
