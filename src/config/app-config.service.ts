@@ -74,4 +74,7 @@ export class AppConfigService {
   get frontendUrl(): string {
     return this.configService.get<string>('FRONTEND_URL');
   }
+  get mempoolApiUrl(): string {
+    return this.configService.get<string>('MEMPOOL_API_URL');
+  }
 }
