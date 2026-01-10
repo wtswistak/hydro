@@ -1,4 +1,58 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import * as bitcoin from 'bitcoinjs-lib';
+import * as ecc from 'tiny-secp256k1';
+import { BIP32Factory } from 'bip32';
+import * as bip39 from 'bip39';
+import ECPairFactory from 'ecpair';
+import { MempoolApiService } from './mempool-api.service';
+
+bitcoin.initEccLib(ecc);
+const bip32 = BIP32Factory(ecc);
+const ECPair = ECPairFactory(ecc);
+
+const NETWORK = bitcoin.networks.testnet;
+
+export interface BitcoinWallet {
+  address: string;
+  privateKey: string; // WIF format
+  publicKey: string;
+}
+
+export interface BitcoinTransactionResult {
+  txid: string;
+  hex: string;
+  fee: number; // satoshis
+}
 
 @Injectable()
-export class BitcoinService {}
+export class BitcoinService {
+  private readonly logger = new Logger(BitcoinService.name);
+
+  constructor(private readonly mempoolApi: MempoolApiService) {}
+
+  createWallet(): BitcoinWallet {
+    const mnemonic = bip39.generateMnemonic();
+    const seed = bip39.mnemonicToSeedSync(mnemonic);
+
+    const root = bip32.fromSeed(seed, NETWORK);
+    const child = root.derivePath("m/84'/1'/0'/0/0");
+
+    // Create SegWit (bech32) address - starts with tb1 on testnet
+    const pubkeyBuffer = Buffer.from(child.publicKey);
+    const { address } = bitcoin.payments.p2wpkh({
+      pubkey: pubkeyBuffer,
+      network: NETWORK,
+    });
+
+    // Convert private key to WIF (Wallet Import Format)
+    const privateKeyWif = child.toWIF();
+
+    this.logger.log(`Created new Bitcoin testnet wallet: ${address}`);
+
+    return {
+      address: address!,
+      privateKey: privateKeyWif,
+      publicKey: pubkeyBuffer.toString('hex'),
+    };
+  }
+}
