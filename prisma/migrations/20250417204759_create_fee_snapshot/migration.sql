@@ -1,4 +1,6 @@
 -- CreateTable
+CREATE EXTENSION IF NOT EXISTS timescaledb;
+
 CREATE TABLE "fee_snapshot" (
     "id" SERIAL NOT NULL,
     "block_number" BIGINT NOT NULL,
