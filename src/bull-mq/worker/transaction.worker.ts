@@ -53,17 +53,21 @@ export class TransactionWorker extends WorkerHost {
       });
       const fiatFee = ethFee.times(rate);
 
-      await this.transactionService.updateTxDetails({
+      await this.transactionService.updateTxWithEvmDetails({
         txId,
-        data: {
+        txData: {
           status,
-          blockNumber: receipt.blockNumber,
-          gasUsed: receipt.gasUsed,
-          gasPrice: receipt.gasPrice,
+          blockRef: BigInt(receipt.blockNumber),
           cryptoFee: ethFee,
           fiatFee: fiatFee,
         },
+        evmData: {
+          gasUsed: receipt.gasUsed,
+          gasPrice: receipt.gasPrice,
+        },
       });
+
+      this.logger.log(`Transaction ${txHash} and EvmTxDetails updated atomically`);
 
       return {
         success: status === TransactionStatus.SUCCESS,

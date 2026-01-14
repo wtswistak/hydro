@@ -12,6 +12,7 @@ import { BalanceAmountTooLowException } from 'src/wallet/exception/balance-amoun
 import { WalletNotMatchException } from 'src/wallet/exception/wallet-not-match.exception';
 import { Decimal } from 'decimal.js';
 import { WalletService } from 'src/wallet/wallet.service';
+import { UpdateEvmDetailsData } from './types/evm-details.types';
 
 @Injectable()
 export class TransactionService {
@@ -148,10 +149,31 @@ export class TransactionService {
     });
   }
 
-  createTx(
-    data: Prisma.TransactionUncheckedCreateInput,
-    prisma: PrismaClient = this.prisma,
-  ) {
+  async updateTxWithEvmDetails({
+    txId,
+    txData,
+    evmData,
+  }: {
+    txId: number;
+    txData: Partial<Pick<Transaction, 'status' | 'blockRef' | 'cryptoFee' | 'fiatFee'>>;
+    evmData: UpdateEvmDetailsData;
+  }) {
+    return this.prisma.$transaction(async (prisma) => {
+      const tx = await prisma.transaction.update({
+        where: { id: txId },
+        data: txData,
+      });
+
+      const evmDetails = await prisma.evmTxDetails.update({
+        where: { transactionId: txId },
+        data: evmData,
+      });
+
+      return { tx, evmDetails };
+    });
+  }
+
+  createTx(data: CreateTransactionData, prisma: PrismaClient = this.prisma) {
     return prisma.transaction.create({
       data: {
         amount: data.amount,
