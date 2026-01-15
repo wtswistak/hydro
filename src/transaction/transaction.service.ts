@@ -183,8 +183,22 @@ export class TransactionService {
         hash: data.hash,
         senderBalanceId: data.senderBalanceId,
         receiverBalanceId: data.receiverBalanceId,
+      },
+    });
+  }
+
+  createEvmDetails(
+    data: CreateEvmDetailsData,
+    prisma: PrismaClient = this.prisma,
+  ) {
+    return prisma.evmTxDetails.create({
+      data: {
+        transactionId: data.transactionId,
         nonce: data.nonce,
         gasLimit: data.gasLimit,
+        gasPrice: data.gasPrice,
+        effectiveGasPrice: data.effectiveGasPrice,
+        gasUsed: data.gasUsed,
       },
     });
   }
