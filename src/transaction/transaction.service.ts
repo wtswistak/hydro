@@ -12,7 +12,8 @@ import { BalanceAmountTooLowException } from 'src/wallet/exception/balance-amoun
 import { WalletNotMatchException } from 'src/wallet/exception/wallet-not-match.exception';
 import { Decimal } from 'decimal.js';
 import { WalletService } from 'src/wallet/wallet.service';
-import { UpdateEvmDetailsData } from './types/evm-details.types';
+import { CreateEvmDetailsData, UpdateEvmDetailsData } from './types/evm-details.types';
+import { CreateTransactionData } from './types/transaction.types';
 
 @Injectable()
 export class TransactionService {
@@ -106,14 +107,23 @@ export class TransactionService {
           receiverAddress,
           senderAddress: wallet.address,
           hash: blockchainTx.hash,
+          blockchainId: cryptoToken.blockchainId,
           senderBalanceId: balance.id,
           receiverBalanceId: receiverBalanceId,
+        },
+        prismaTx,
+      );
+      this.logger.log(`Transaction created with id: ${tx.id}`);
+
+      await this.createEvmDetails(
+        {
+          transactionId: tx.id,
           nonce: blockchainTx.nonce,
           gasLimit: blockchainTx.gasLimit,
         },
         prismaTx,
       );
-      this.logger.log(`Transaction created with id: ${tx.id}`);
+      this.logger.log(`EvmTxDetails created for transaction id: ${tx.id}`);
 
       await this.transactionQueue.add(
         'transaction',
@@ -141,7 +151,7 @@ export class TransactionService {
     data,
   }: {
     txId: number;
-    data: Partial<Transaction>;
+    data: Partial<Pick<Transaction, 'status' | 'blockRef' | 'cryptoFee' | 'fiatFee'>>;
   }) {
     return this.prisma.transaction.update({
       where: { id: txId },
@@ -181,6 +191,7 @@ export class TransactionService {
         receiverAddress: data.receiverAddress,
         senderAddress: data.senderAddress,
         hash: data.hash,
+        blockchainId: data.blockchainId,
         senderBalanceId: data.senderBalanceId,
         receiverBalanceId: data.receiverBalanceId,
       },
@@ -206,6 +217,7 @@ export class TransactionService {
   getTxByHash({ hash }: { hash: string }) {
     return this.prisma.transaction.findUnique({
       where: { hash },
+      include: { evmDetails: true },
     });
   }
 }
