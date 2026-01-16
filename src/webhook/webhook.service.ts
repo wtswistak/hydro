@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Prisma, TransactionStatus } from '@prisma/client';
+import { TransactionStatus } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { TransactionService } from 'src/transaction/transaction.service';
 import { WalletService } from 'src/wallet/wallet.service';
@@ -19,6 +19,7 @@ export class WebhookService {
     private readonly blockchainService: BlockchainService,
     private readonly coingeckoService: CoingeckoService,
   ) {}
+
   async handleAlchemyWebhook(
     payload: AlchemyAddressActivityDto,
   ): Promise<void> {
@@ -88,6 +89,7 @@ export class WebhookService {
           receiverAddress: activity[0].toAddress,
           amount: activity[0].value.toString(),
           status: TransactionStatus.SUCCESS,
+          blockchainId: cryptoToken.blockchainId,
           ...(receiverBalanceId && {
             receiverBalanceId,
           }),
@@ -100,6 +102,15 @@ export class WebhookService {
         txHash: activity[0].hash,
       });
 
+      await this.transactionService.createEvmDetails(
+        {
+          transactionId: tx.id,
+          gasUsed: txReceipt.gasUsed,
+          gasPrice: txReceipt.gasPrice,
+        },
+        prismaTx,
+      );
+
       const ethFee = this.blockchainService.calculateFee({
         gasUsed: txReceipt.gasUsed,
         gasPrice: txReceipt.gasPrice,
@@ -111,8 +122,7 @@ export class WebhookService {
       await this.transactionService.updateTxDetails({
         txId: tx.id,
         data: {
-          gasUsed: txReceipt.gasUsed,
-          gasPrice: txReceipt.gasPrice,
+          blockRef: BigInt(txReceipt.blockNumber),
           cryptoFee: ethFee,
           fiatFee: fiatFee,
         },
