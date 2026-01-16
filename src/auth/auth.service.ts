@@ -108,6 +108,9 @@ export class AuthService {
       where: {
         userId: user.id,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
 
     if (!isEmailVerified?.used) {
