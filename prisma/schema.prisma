@@ -94,6 +94,7 @@ model Transaction {
   senderBalance     Balance?          @relation("Sender", fields: [senderBalanceId], references: [id])
   receiverBalance   Balance?          @relation("Receiver", fields: [receiverBalanceId], references: [id])
   evmDetails        EvmTxDetails?
+  btcDetails        BtcTxDetails?
 
   @@map("transaction")
 }
@@ -112,6 +113,24 @@ model EvmTxDetails {
   transaction     Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
 
   @@map("evm_tx_details")
+}
+
+model BtcTxDetails {
+  id              Int       @id @default(autoincrement())
+  transactionId   Int       @unique @map("transaction_id")
+  vsize           Int?
+  weight          Int?
+  feeRate         Float?    @map("fee_rate")
+  feeSatoshis     BigInt?   @map("fee_satoshis")
+  confirmations   Int?      @default(0)
+  inputs          Json?
+  outputs         Json?
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  transaction     Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@map("btc_tx_details")
 }
 
 model Balance {
