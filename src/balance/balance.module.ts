@@ -2,14 +2,14 @@ import { Module } from '@nestjs/common';
 import { BalanceController } from './balance.controller';
 import { BalanceService } from './balance.service';
 import { AppConfigService } from 'src/config/app-config.service';
-import { CryptoService } from 'src/wallet/crypto.service';
 import { WalletModule } from 'src/wallet/wallet.module';
-import { TransactionModule } from 'src/transaction/transaction.module';
 import { CoingeckoModule } from 'src/coingecko/coingecko.module';
+import { BlockchainModule } from 'src/blockchain/blockchain.module';
 
 @Module({
-  imports: [WalletModule, TransactionModule, CoingeckoModule],
+  imports: [WalletModule, CoingeckoModule, BlockchainModule],
   controllers: [BalanceController],
-  providers: [BalanceService, AppConfigService, CryptoService],
+  providers: [BalanceService, AppConfigService],
+  exports: [BalanceService],
 })
 export class BalanceModule {}

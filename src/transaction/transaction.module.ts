@@ -10,19 +10,25 @@ import { CoingeckoModule } from 'src/coingecko/coingecko.module';
 import { BalanceService } from 'src/balance/balance.service';
 import { WalletModule } from 'src/wallet/wallet.module';
 import { TransactionWorker } from 'src/bull-mq/worker/transaction.worker';
+import { BitcoinModule } from 'src/bitcoin/bitcoin.module';
+import { BlockchainModule } from 'src/blockchain/blockchain.module';
+import { BalanceModule } from 'src/balance/balance.module';
 
 @Module({
-  imports: [BullQueueModule, CoingeckoModule, WalletModule],
+  imports: [
+    BullQueueModule,
+    CoingeckoModule,
+    WalletModule,
+    BlockchainModule,
+    BitcoinModule,
+    BalanceModule,
+  ],
   controllers: [TransactionController],
   providers: [
     AppConfigService,
     TransactionService,
-    BlockchainService,
-    CryptoService,
     TransactionWorker,
-    WalletService,
-    BalanceService,
   ],
-  exports: [TransactionService, CryptoService, BlockchainService],
+  exports: [TransactionService],
 })
 export class TransactionModule {}
