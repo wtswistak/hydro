@@ -83,14 +83,14 @@ model Transaction {
   receiverBalanceId Int?              @map("receiver_balance_id")
   status            TransactionStatus @default(PENDING)
   hash              String?           @unique
-  blockchainId      Int?              @map("blockchain_id")
+  blockchainId      Int               @map("blockchain_id")
   blockRef          BigInt?           @map("block_ref")
   cryptoFee         Decimal?          @map("crypto_fee")
   fiatFee           Decimal?          @map("fiat_fee")
   createdAt         DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt         DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  blockchain        Blockchain?        @relation(fields: [blockchainId], references: [id])
+  blockchain        Blockchain        @relation(fields: [blockchainId], references: [id])
   senderBalance     Balance?          @relation("Sender", fields: [senderBalanceId], references: [id])
   receiverBalance   Balance?          @relation("Receiver", fields: [receiverBalanceId], references: [id])
   evmDetails        EvmTxDetails?
@@ -207,4 +207,5 @@ enum TransactionStatus {
 
 enum BlockchainType {
   EVM
+  BITCOIN
 }
