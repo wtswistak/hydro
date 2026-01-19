@@ -46,7 +46,7 @@ export class WalletService {
       throw new ChainNotExistsException();
     }
     this.logger.log(`Creating wallet for user with id: ${userId}`);
-    const blockchainWallet = this.blockchainService.createWallet();
+    const blockchainWallet = this.blockchainService.createWallet(chain.type);
     const encryptedKey = this.cryptoService.encrypt({
       privateKey: blockchainWallet.privateKey,
     });

@@ -8,6 +8,8 @@ import {
   SendTransactionPayload,
 } from './types/blockchain.types';
 import { Decimal } from 'decimal.js';
+import { BitcoinService } from 'src/bitcoin/bitcoin.service';
+import { BlockchainType } from '@prisma/client';
 
 export interface EstimatedFee {
   estimatedGas: string;
@@ -21,7 +23,10 @@ export class BlockchainService {
   private readonly privateWallet: ethers.Wallet;
   private readonly logger = new Logger(BlockchainService.name);
 
-  constructor(private readonly configService: AppConfigService) {
+  constructor(
+    private readonly configService: AppConfigService,
+    private readonly bitcoinService: BitcoinService,
+  ) {
     this.provider = new JsonRpcProvider(configService.ethNodeUrl);
     this.privateWallet = new ethers.Wallet(
       configService.privateKey,
@@ -37,8 +42,13 @@ export class BlockchainService {
     throw new HttpException(message, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  createWallet() {
-    return ethers.Wallet.createRandom();
+  createWallet(type: BlockchainType) {
+    if (type === BlockchainType.BITCOIN) {
+      return this.bitcoinService.createWallet();
+    }
+    if (type === BlockchainType.EVM) {
+      return ethers.Wallet.createRandom();
+    }
   }
 
   getBlockNumber(): Promise<number> {
