@@ -5,18 +5,13 @@ import { BIP32Factory } from 'bip32';
 import * as bip39 from 'bip39';
 import ECPairFactory from 'ecpair';
 import { MempoolApiService } from './mempool-api.service';
+import { BitcoinWallet } from './types/bitcoin.types';
 
 bitcoin.initEccLib(ecc);
 const bip32 = BIP32Factory(ecc);
 const ECPair = ECPairFactory(ecc);
 
 const NETWORK = bitcoin.networks.testnet;
-
-export interface BitcoinWallet {
-  address: string;
-  privateKey: string; // WIF format
-  publicKey: string;
-}
 
 export interface BitcoinTransactionResult {
   txid: string;
@@ -31,9 +26,12 @@ export class BitcoinService {
   constructor(private readonly mempoolApi: MempoolApiService) {}
 
   createWallet(): BitcoinWallet {
+    // Generate random mnemonic (12 words is standard, 24 needs wordlist param)
     const mnemonic = bip39.generateMnemonic();
     const seed = bip39.mnemonicToSeedSync(mnemonic);
 
+    // Derive key using BIP84 path for native SegWit (m/84'/1'/0'/0/0)
+    // 1' = testnet, 0' = first account, 0 = external chain, 0 = first address
     const root = bip32.fromSeed(seed, NETWORK);
     const child = root.derivePath("m/84'/1'/0'/0/0");
 
