@@ -1,7 +1,10 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { MempoolFeeEstimate } from './types/mempool-api.interface';
+import {
+  MempoolUtxo,
+  MempoolFeeEstimate,
+} from './types/mempool-api.interface';
 import { AppConfigService } from 'src/config/app-config.service';
 
 @Injectable()
@@ -44,7 +47,32 @@ export class MempoolApiService {
       );
     }
   }
+  /**
+   * Get UTXOs for an address (needed for building transactions)
+   */
+  async getUtxos(address: string): Promise<MempoolUtxo[]> {
+    return this.request<MempoolUtxo[]>(`/address/${address}/utxo`);
+  }
+
+  /**
+   * Get recommended fee rates in sat/vB
+   */
   async getFeeEstimates(): Promise<MempoolFeeEstimate> {
     return this.request<MempoolFeeEstimate>('/v1/fees/recommended');
+  }
+
+  /**
+   * Broadcast a raw transaction hex
+   * @returns transaction ID (txid)
+   */
+  async broadcastTransaction(txHex: string): Promise<string> {
+    return this.request<string>('/tx', 'POST', txHex);
+  }
+
+  /**
+   * Get raw transaction hex
+   */
+  async getRawTransaction(txid: string): Promise<string> {
+    return this.request<string>(`/tx/${txid}/hex`);
   }
 }

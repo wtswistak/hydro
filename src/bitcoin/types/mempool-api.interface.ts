@@ -5,3 +5,14 @@ export interface MempoolFeeEstimate {
   economyFee: number; // sat/vB
   minimumFee: number; // sat/vB
 }
+export interface MempoolUtxo {
+  txid: string;
+  vout: number;
+  status: {
+    confirmed: boolean;
+    block_height?: number;
+    block_hash?: string;
+    block_time?: number;
+  };
+  value: number; // satoshis
+}

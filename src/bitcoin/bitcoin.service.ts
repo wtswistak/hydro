@@ -77,4 +77,112 @@ export class BitcoinService {
 
     return { fee, feeRate };
   }
+
+  /**
+   * Send Bitcoin transaction
+   * @param fromPrivateKeyWif Sender's private key in WIF format
+   * @param toAddress Recipient's address
+   * @param amountSatoshis Amount to send in satoshis
+   * @param feeRate Optional fee rate in sat/vB
+   */
+  async sendTransaction(
+    fromPrivateKeyWif: string,
+    toAddress: string,
+    amountSatoshis: number,
+    feeRate?: number,
+  ): Promise<BitcoinTransactionResult> {
+    // Import sender's key
+    const keyPair = ECPair.fromWIF(fromPrivateKeyWif, NETWORK);
+    const { address: fromAddress } = bitcoin.payments.p2wpkh({
+      pubkey: Buffer.from(keyPair.publicKey),
+      network: NETWORK,
+    });
+
+    this.logger.log(
+      `Sending ${amountSatoshis} satoshis from ${fromAddress} to ${toAddress}`,
+    );
+
+    // Get UTXOs
+    const utxos = await this.mempoolApi.getUtxos(fromAddress!);
+    if (utxos.length === 0) {
+      throw new Error('No UTXOs available');
+    }
+
+    // Calculate fee
+    const { fee, feeRate: usedFeeRate } = await this.estimateFee(
+      utxos.length,
+      2,
+      feeRate,
+    );
+    this.logger.log(`Estimated fee: ${fee} satoshis (${usedFeeRate} sat/vB)`);
+
+    // Calculate total available
+    const totalAvailable = utxos.reduce((sum, utxo) => sum + utxo.value, 0);
+    const totalNeeded = amountSatoshis + fee;
+
+    if (totalAvailable < totalNeeded) {
+      throw new Error(
+        `Insufficient balance. Available: ${totalAvailable}, Needed: ${totalNeeded} (${amountSatoshis} + ${fee} fee)`,
+      );
+    }
+
+    // Build transaction using PSBT
+    const psbt = new bitcoin.Psbt({ network: NETWORK });
+
+    // Add inputs
+    for (const utxo of utxos) {
+      const txHex = await this.mempoolApi.getRawTransaction(utxo.txid);
+      psbt.addInput({
+        hash: utxo.txid,
+        index: utxo.vout,
+        nonWitnessUtxo: Buffer.from(txHex, 'hex'),
+        witnessUtxo: {
+          script: bitcoin.payments.p2wpkh({
+            pubkey: Buffer.from(keyPair.publicKey),
+            network: NETWORK,
+          }).output!,
+          value: BigInt(utxo.value),
+        },
+      });
+    }
+
+    // Add recipient output
+    psbt.addOutput({
+      address: toAddress,
+      value: BigInt(amountSatoshis),
+    });
+
+    // Add change output (if there's change)
+    const change = totalAvailable - amountSatoshis - fee;
+    if (change > 546) {
+      // Dust limit
+      psbt.addOutput({
+        address: fromAddress!,
+        value: BigInt(change),
+      });
+    }
+
+    // Sign all inputs
+    for (let i = 0; i < utxos.length; i++) {
+      psbt.signInput(i, keyPair);
+    }
+
+    // Finalize and extract
+    psbt.finalizeAllInputs();
+    const tx = psbt.extractTransaction();
+    const txHex = tx.toHex();
+    const txid = tx.getId();
+
+    this.logger.log(`Transaction built: ${txid}`);
+
+    // Broadcast
+    const broadcastedTxid = await this.mempoolApi.broadcastTransaction(txHex);
+    this.logger.log(`Transaction broadcasted: ${broadcastedTxid}`);
+
+    return {
+      txid: broadcastedTxid,
+      hex: txHex,
+      fee,
+    };
+  }
 }
