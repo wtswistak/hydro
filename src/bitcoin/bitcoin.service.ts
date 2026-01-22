@@ -53,4 +53,28 @@ export class BitcoinService {
       publicKey: pubkeyBuffer.toString('hex'),
     };
   }
+  /**
+   * Estimate transaction fee in satoshis
+   * @param inputCount Number of UTXOs to spend
+   * @param outputCount Number of outputs (usually 2: recipient + change)
+   * @param feeRate Fee rate in sat/vB (optional, will fetch recommended if not provided)
+   */
+  async estimateFee(
+    inputCount: number,
+    outputCount: number = 2,
+    feeRate?: number,
+  ): Promise<{ fee: number; feeRate: number }> {
+    // Get recommended fee rate if not provided
+    if (!feeRate) {
+      const fees = await this.mempoolApi.getFeeEstimates();
+      feeRate = fees.halfHourFee; // Use medium priority
+    }
+
+    // Estimate transaction size for P2WPKH (SegWit)
+    // P2WPKH input: ~68 vBytes, output: ~31 vBytes, overhead: ~10.5 vBytes
+    const vSize = Math.ceil(10.5 + inputCount * 68 + outputCount * 31);
+    const fee = vSize * feeRate;
+
+    return { fee, feeRate };
+  }
 }

@@ -1,6 +1,7 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { MempoolFeeEstimate } from './types/mempool-api.interface';
 import { AppConfigService } from 'src/config/app-config.service';
 
 @Injectable()
@@ -42,5 +43,8 @@ export class MempoolApiService {
         HttpStatus.BAD_GATEWAY,
       );
     }
+  }
+  async getFeeEstimates(): Promise<MempoolFeeEstimate> {
+    return this.request<MempoolFeeEstimate>('/v1/fees/recommended');
   }
 }
