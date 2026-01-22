@@ -13,7 +13,10 @@ import { WalletNotMatchException } from 'src/wallet/exception/wallet-not-match.e
 import { Decimal } from 'decimal.js';
 import { WalletService } from 'src/wallet/wallet.service';
 import { CreateEvmDetailsData, UpdateEvmDetailsData } from './types/evm-details.types';
+import { BitcoinService } from 'src/bitcoin/bitcoin.service';
+import { BlockchainType } from '@prisma/client';
 import { CreateTransactionData } from './types/transaction.types';
+import { BtcTxDetailsRepository } from './repository/btc-tx-details.repository';
 
 @Injectable()
 export class TransactionService {
@@ -22,8 +25,10 @@ export class TransactionService {
     private readonly prisma: PrismaService,
     private readonly walletService: WalletService,
     private readonly blockchainService: BlockchainService,
+    private readonly bitcoinService: BitcoinService,
     private readonly cryptoService: CryptoService,
     private readonly balanceService: BalanceService,
+    private readonly btcTxDetailsRepository: BtcTxDetailsRepository,
     @InjectQueue('transaction')
     private readonly transactionQueue: Queue,
   ) {}
@@ -41,6 +46,7 @@ export class TransactionService {
     const prismaTx = this.prisma.$transaction(async (prismaTx) => {
       const cryptoToken = await prismaTx.cryptoToken.findUnique({
         where: { symbol: cryptoSymbol },
+        include: { blockchain: true },
       });
       const wallet = await this.walletService.getWalletById({
         id: senderWalletId,
@@ -92,13 +98,37 @@ export class TransactionService {
         encryptedKey: wallet.privateKey,
       });
 
-      const blockchainTx = await this.blockchainService.sendTransaction({
-        receiverAddress,
-        amount,
-        privateKey: decryptedPrivateKey,
-        contractAddress: cryptoToken.contractAddress,
-        decimals: cryptoToken.decimals,
-      });
+      let txHash: string;
+      let evmTxData: any = null;
+      let btcTxData: any = null;
+
+      // Handle based on Blockchain Type
+      if (cryptoToken.blockchain.type === BlockchainType.BITCOIN) {
+        const amountSatoshis = Math.round(parseFloat(amount) * 100_000_000);
+        const btcResult = await this.bitcoinService.sendTransaction(
+          decryptedPrivateKey,
+          receiverAddress,
+          amountSatoshis
+        );
+        txHash = btcResult.txid;
+        btcTxData = {
+          feeSatoshis: BigInt(btcResult.fee),
+        };
+      }
+      if (cryptoToken.blockchain.type === BlockchainType.EVM) {
+        const blockchainTx = await this.blockchainService.sendTransaction({
+          receiverAddress,
+          amount,
+          privateKey: decryptedPrivateKey,
+          contractAddress: cryptoToken.contractAddress,
+          decimals: cryptoToken.decimals,
+        });
+        txHash = blockchainTx.hash;
+        evmTxData = {
+          nonce: blockchainTx.nonce,
+          gasLimit: blockchainTx.gasLimit,
+        };
+      }
 
       const tx = await this.createTx(
         {
@@ -106,7 +136,7 @@ export class TransactionService {
           status: TransactionStatus.PENDING,
           receiverAddress,
           senderAddress: wallet.address,
-          hash: blockchainTx.hash,
+          hash: txHash,
           blockchainId: cryptoToken.blockchainId,
           senderBalanceId: balance.id,
           receiverBalanceId: receiverBalanceId,
@@ -115,15 +145,26 @@ export class TransactionService {
       );
       this.logger.log(`Transaction created with id: ${tx.id}`);
 
-      await this.createEvmDetails(
-        {
-          transactionId: tx.id,
-          nonce: blockchainTx.nonce,
-          gasLimit: blockchainTx.gasLimit,
-        },
-        prismaTx,
-      );
-      this.logger.log(`EvmTxDetails created for transaction id: ${tx.id}`);
+      if (evmTxData) {
+        await this.createEvmDetails(
+          {
+            transactionId: tx.id,
+            ...evmTxData
+          },
+          prismaTx,
+        );
+        this.logger.log(`EvmTxDetails created for transaction id: ${tx.id}`);
+      }
+      if (btcTxData) {
+        await this.btcTxDetailsRepository.createBtcTxDetails(
+          {
+            transactionId: tx.id,
+            feeSatoshis: btcTxData.feeSatoshis,
+          },
+          prismaTx,
+        );
+        this.logger.log(`BtcTxDetails created for transaction id: ${tx.id}`);
+      }
 
       await this.transactionQueue.add(
         'transaction',
