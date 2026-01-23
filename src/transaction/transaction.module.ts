@@ -13,6 +13,7 @@ import { TransactionWorker } from 'src/bull-mq/worker/transaction.worker';
 import { BitcoinModule } from 'src/bitcoin/bitcoin.module';
 import { BlockchainModule } from 'src/blockchain/blockchain.module';
 import { BalanceModule } from 'src/balance/balance.module';
+import { BtcTxDetailsRepository } from './repository/btc-tx-details.repository';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { BalanceModule } from 'src/balance/balance.module';
     AppConfigService,
     TransactionService,
     TransactionWorker,
+    BtcTxDetailsRepository,
   ],
   exports: [TransactionService],
 })
