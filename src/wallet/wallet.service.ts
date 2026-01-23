@@ -81,6 +81,72 @@ export class WalletService {
     return newWallet;
   }
 
+  async createAllWallets(userId: number) {
+    this.logger.log(`Starting optimized wallet creation for user: ${userId}`);
+
+    const blockchains = await this.prisma.blockchain.findMany({
+      include: {
+        cryptoTokens: true,
+      },
+    });
+
+    const existingBlockchainIds =
+      await this.walletRepository.getBlockchainIdsWithWallet({ userId });
+
+    // Filter out blockchains that already have a wallet
+    const chainsToCreate = blockchains.filter(
+      (chain) => !existingBlockchainIds.includes(chain.id),
+    );
+
+    if (chainsToCreate.length === 0) {
+      this.logger.log(`All wallets already exist for user: ${userId}`);
+      return [];
+    }
+
+    this.logger.log(
+      `Creating wallets for chains: ${chainsToCreate.map((c) => c.name).join(', ')}`,
+    );
+
+    const newWallets = await this.prisma.$transaction(async (prisma) => {
+      const createdWallets: Wallet[] = [];
+
+      for (const chain of chainsToCreate) {
+        const blockchainWallet = this.blockchainService.createWallet(
+          chain.type,
+        );
+        const encryptedKey = this.cryptoService.encrypt({
+          privateKey: blockchainWallet.privateKey,
+        });
+
+        const wallet = await prisma.wallet.create({
+          data: {
+            address: blockchainWallet.address,
+            privateKey: encryptedKey,
+            blockchainId: chain.id,
+            userId,
+          },
+        });
+
+        if (chain.cryptoTokens.length > 0) {
+          await prisma.balance.createMany({
+            data: chain.cryptoTokens.map((token) => ({
+              walletId: wallet.id,
+              cryptoTokenId: token.id,
+              amount: 0,
+            })),
+          });
+        }
+
+        createdWallets.push(wallet);
+      }
+
+      return createdWallets;
+    });
+
+    this.logger.log(`Successfully created ${newWallets.length} wallets`);
+    return newWallets;
+  }
+
   async getEstimatedFee({
     receiverAddress,
     amount,
