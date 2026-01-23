@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { BlockchainService } from './blockchain.service';
 import { SendTransactionDto } from './dto/send-transaction.dto';
+import { BlockchainType } from '@prisma/client';
 
 @Controller('blockchain')
 export class BlockchainController {
@@ -17,7 +18,7 @@ export class BlockchainController {
   // for dev
   @Post('create-wallet')
   createWallet() {
-    return this.blockchainService.createWallet();
+    return this.blockchainService.createWallet(BlockchainType.EVM);
   }
   // for dev
   @Get()
