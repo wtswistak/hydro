@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { WalletModule } from 'src/wallet/wallet.module';
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { AppConfigService } from 'src/config/app-config.service';
@@ -10,6 +11,7 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 @Module({
   imports: [
     NotificationModule,
+    WalletModule,
     JwtModule.register({
       secret: process.env.ACCESS_TOKEN,
       signOptions: { expiresIn: '1d' }, // default expiration time for access token

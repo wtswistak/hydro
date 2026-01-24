@@ -16,6 +16,7 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import { AppConfigService } from 'src/config/app-config.service';
 import { REFRESH_TOKEN_EXPIRES_TIME } from 'src/common/constant';
 import { CreateToken, JWTTokens, TokenPayload } from './interface';
+import { WalletService } from 'src/wallet/wallet.service';
 import { EmailNotVerifiedException } from './exception/email-not-verified.exception';
 
 @Injectable()
@@ -27,6 +28,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly notificationService: NotificationService,
     private readonly configService: AppConfigService,
+    private readonly walletService: WalletService,
   ) {}
 
   private async generateTokens(payload: TokenPayload): Promise<JWTTokens> {
@@ -248,9 +250,11 @@ export class AuthService {
         },
       });
 
+      await this.walletService.createAllWallets(emailVerification.userId, prisma);
+
       return user;
     });
-    this.logger.log(`Email verified for user: ${result.id}`);
+    this.logger.log(`Email verified and wallets created for user: ${result.id}`);
   }
 
   createToken({ userId, token }: CreateToken) {
