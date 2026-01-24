@@ -31,20 +31,26 @@ export class WalletService {
     userId,
     blockchain,
   }: { userId: number } & CreateWalletDto): Promise<Wallet> {
-    this.logger.log(`Checking if wallet exists for user with id: ${userId}`);
-    const existingWallet = await this.walletRepository.getWalletByUserId({
-      userId,
-    });
-    if (existingWallet) {
-      throw new WalletExistsException();
-    }
-
     const chain = await this.prisma.blockchain.findUnique({
       where: { name: blockchain },
     });
     if (!chain) {
       throw new ChainNotExistsException();
     }
+
+    this.logger.log(
+      `Checking if wallet exists for user with id: ${userId} and blockchain: ${blockchain}`,
+    );
+    const existingWallet =
+      await this.walletRepository.getWalletByUserAndBlockchain({
+        userId,
+        blockchainId: chain.id,
+      });
+
+    if (existingWallet) {
+      throw new WalletExistsException();
+    }
+
     this.logger.log(`Creating wallet for user with id: ${userId}`);
     const blockchainWallet = this.blockchainService.createWallet(chain.type);
     const encryptedKey = this.cryptoService.encrypt({
@@ -81,17 +87,20 @@ export class WalletService {
     return newWallet;
   }
 
-  async createAllWallets(userId: number) {
+  async createAllWallets(userId: number, prismaTx: PrismaClient = this.prisma) {
     this.logger.log(`Starting optimized wallet creation for user: ${userId}`);
 
-    const blockchains = await this.prisma.blockchain.findMany({
+    const blockchains = await prismaTx.blockchain.findMany({
       include: {
         cryptoTokens: true,
       },
     });
 
     const existingBlockchainIds =
-      await this.walletRepository.getBlockchainIdsWithWallet({ userId });
+      await this.walletRepository.getBlockchainIdsWithWallet(
+        { userId },
+        prismaTx,
+      );
 
     // Filter out blockchains that already have a wallet
     const chainsToCreate = blockchains.filter(
@@ -107,44 +116,38 @@ export class WalletService {
       `Creating wallets for chains: ${chainsToCreate.map((c) => c.name).join(', ')}`,
     );
 
-    const newWallets = await this.prisma.$transaction(async (prisma) => {
-      const createdWallets: Wallet[] = [];
+    const createdWallets: Wallet[] = [];
 
-      for (const chain of chainsToCreate) {
-        const blockchainWallet = this.blockchainService.createWallet(
-          chain.type,
-        );
-        const encryptedKey = this.cryptoService.encrypt({
-          privateKey: blockchainWallet.privateKey,
+    for (const chain of chainsToCreate) {
+      const blockchainWallet = this.blockchainService.createWallet(chain.type);
+      const encryptedKey = this.cryptoService.encrypt({
+        privateKey: blockchainWallet.privateKey,
+      });
+
+      const wallet = await prismaTx.wallet.create({
+        data: {
+          address: blockchainWallet.address,
+          privateKey: encryptedKey,
+          blockchainId: chain.id,
+          userId,
+        },
+      });
+
+      if (chain.cryptoTokens.length > 0) {
+        await prismaTx.balance.createMany({
+          data: chain.cryptoTokens.map((token) => ({
+            walletId: wallet.id,
+            cryptoTokenId: token.id,
+            amount: 0,
+          })),
         });
-
-        const wallet = await prisma.wallet.create({
-          data: {
-            address: blockchainWallet.address,
-            privateKey: encryptedKey,
-            blockchainId: chain.id,
-            userId,
-          },
-        });
-
-        if (chain.cryptoTokens.length > 0) {
-          await prisma.balance.createMany({
-            data: chain.cryptoTokens.map((token) => ({
-              walletId: wallet.id,
-              cryptoTokenId: token.id,
-              amount: 0,
-            })),
-          });
-        }
-
-        createdWallets.push(wallet);
       }
 
-      return createdWallets;
-    });
+      createdWallets.push(wallet);
+    }
 
-    this.logger.log(`Successfully created ${newWallets.length} wallets`);
-    return newWallets;
+    this.logger.log(`Successfully created ${createdWallets.length} wallets`);
+    return createdWallets;
   }
 
   async getEstimatedFee({

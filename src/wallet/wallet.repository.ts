@@ -76,8 +76,11 @@ export class WalletRepository {
     });
   }
 
-  async getBlockchainIdsWithWallet({ userId }: { userId: number }) {
-    const wallets = await this.prisma.wallet.findMany({
+  async getBlockchainIdsWithWallet(
+    { userId }: { userId: number },
+    prisma: PrismaClient = this.prisma,
+  ) {
+    const wallets = await prisma.wallet.findMany({
       where: { userId },
       select: { blockchainId: true },
     });
