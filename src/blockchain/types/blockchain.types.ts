@@ -13,3 +13,7 @@ export interface EstimatedFeePayload {
   decimals: number;
   senderAddress?: string;
 }
+
+export interface EstimatedFee {
+  feeInCrypto: string;
+}

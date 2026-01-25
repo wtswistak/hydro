@@ -4,18 +4,13 @@ import { ERC20_ABI } from './erc20.abi';
 import { AppConfigService } from 'src/config/app-config.service';
 import { SendTransactionDto } from './dto/send-transaction.dto';
 import {
+  EstimatedFee,
   EstimatedFeePayload,
   SendTransactionPayload,
 } from './types/blockchain.types';
 import { Decimal } from 'decimal.js';
 import { BitcoinService } from 'src/bitcoin/bitcoin.service';
 import { BlockchainType } from '@prisma/client';
-
-export interface EstimatedFee {
-  estimatedGas: string;
-  gasPrice: string;
-  feeInEth: string;
-}
 
 @Injectable()
 export class BlockchainService {
