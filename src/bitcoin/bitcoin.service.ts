@@ -78,6 +78,26 @@ export class BitcoinService {
     return { fee, feeRate };
   }
 
+  async getEstimatedTransactionFee(
+    senderAddress: string,
+    amountSatoshis: number,
+  ): Promise<{ fee: number; feeRate: number }> {
+    const utxos = await this.mempoolApi.getUtxos(senderAddress);
+    if (utxos.length === 0) {
+      // Logic fallback if no UTXOs: assume 1 input 2 outputs for estimation
+      return this.estimateFee(1, 2);
+    }
+    
+    // In a real implementation we would select specific UTXOs.
+    // Here we assume utilizing all (or first N needed) to simplistic estimation
+    // For now, let's use the count of UTXOs that covers the balance or just all utxos
+    // A better approach is "Coin Selection" logic.
+    // For estimation purposes, we can try to simluate using 1 input if balance allows, or more.
+    
+    // Quick estimation: 1 input, 2 outputs
+    return this.estimateFee(1, 2);
+  }
+
   /**
    * Send Bitcoin transaction
    * @param fromPrivateKeyWif Sender's private key in WIF format

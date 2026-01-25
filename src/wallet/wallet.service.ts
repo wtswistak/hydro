@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
-  BlockchainService,
-  EstimatedFee,
+  BlockchainService
 } from 'src/blockchain/blockchain.service';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { CryptoService } from './crypto.service';
@@ -175,16 +174,21 @@ export class WalletService {
       throw new WalletNotExistsException();
     }
 
+    const blockchain = await this.prisma.blockchain.findUnique({
+      where: { id: cryptoToken.blockchainId },
+    });
+
     const estimatedFee = await this.blockchainService.estimateFee({
       receiverAddress,
       amount,
       contractAddress: cryptoToken.contractAddress,
       decimals: cryptoToken.decimals,
       senderAddress: wallet.address,
+      type: blockchain.type,
     });
 
     this.logger.log(
-      `Estimated fee for ${cryptoSymbol}: ${estimatedFee.feeInEth} ETH`,
+      `Estimated fee for ${cryptoSymbol}: ${estimatedFee.feeInCrypto}`,
     );
 
     return estimatedFee;

@@ -152,51 +152,64 @@ export class BlockchainService {
     contractAddress,
     decimals,
     senderAddress,
-  }: EstimatedFeePayload): Promise<EstimatedFee> {
+    type,
+  }: EstimatedFeePayload & { type?: BlockchainType }): Promise<EstimatedFee> {
     try {
-      let estimatedGas: bigint;
-      const feeData = await this.provider.getFeeData();
-      const gasPrice = feeData.gasPrice || feeData.maxFeePerGas;
-
-      if (contractAddress) {
-        // simulate ERC20 transfer for gas estimation
-        const contract = new ethers.Contract(
-          contractAddress,
-          ERC20_ABI,
-          this.provider,
+      if (type === BlockchainType.BITCOIN) {
+        const amountInSats = new Decimal(amount).mul(100_000_000).toNumber();
+        const { fee } = await this.bitcoinService.getEstimatedTransactionFee(
+          senderAddress,
+          amountInSats,
         );
-        const amountInUnits = ethers.parseUnits(amount, decimals);
-        try {
-          const overrides = senderAddress ? { from: senderAddress } : {};
-          estimatedGas = await contract.transfer.estimateGas(
-            receiverAddress,
-            amountInUnits,
-            overrides,
+        const feeInBtc = new Decimal(fee).div(100_000_000).toFixed(8);
+
+        return {
+          feeInCrypto: feeInBtc, // Convert Sats -> BTC
+        };
+      }
+      if (type === BlockchainType.EVM) {
+        let estimatedGas: bigint;
+        const feeData = await this.provider.getFeeData();
+        const gasPrice = feeData.gasPrice || feeData.maxFeePerGas;
+
+        if (contractAddress) {
+          // simulate ERC20 transfer for gas estimation
+          const contract = new ethers.Contract(
+            contractAddress,
+            ERC20_ABI,
+            this.provider,
           );
-        } catch (error) {
-          estimatedGas = BigInt(65000); // default for ERC20 transfer
-          this.logger.warn(
-            `Failed to estimate gas for ERC20 transfer, using default: ${estimatedGas}`,
-          );
+          const amountInUnits = ethers.parseUnits(amount, decimals);
+          try {
+            const overrides = senderAddress ? { from: senderAddress } : {};
+            estimatedGas = await contract.transfer.estimateGas(
+              receiverAddress,
+              amountInUnits,
+              overrides,
+            );
+          } catch (error) {
+            estimatedGas = BigInt(65000); // default for ERC20 transfer
+            this.logger.warn(
+              `Failed to estimate gas for ERC20 transfer, using default: ${estimatedGas}`,
+            );
+          }
         }
+
+        if (!contractAddress) {
+          estimatedGas = await this.provider.estimateGas({
+            to: receiverAddress,
+            value: ethers.parseEther(amount.toString()),
+            from: senderAddress,
+          });
+        }
+
+        const feeInWei = estimatedGas * BigInt(gasPrice);
+        const feeInEth = ethers.formatEther(feeInWei);
+
+        return {
+          feeInCrypto: feeInEth,
+        };
       }
-
-      if (!contractAddress) {
-        estimatedGas = await this.provider.estimateGas({
-          to: receiverAddress,
-          value: ethers.parseEther(amount.toString()),
-          from: senderAddress,
-        });
-      }
-
-      const feeInWei = estimatedGas * BigInt(gasPrice);
-      const feeInEth = ethers.formatEther(feeInWei);
-
-      return {
-        estimatedGas: estimatedGas.toString(),
-        gasPrice: gasPrice.toString(),
-        feeInEth,
-      };
     } catch (error) {
       this.handleError(error, 'estimateFee');
     }
