@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "src/database/prisma/prisma.service";
+import { PrismaService } from "src/core/database/prisma/prisma.service";
 import { CreateBtcDetailsData } from "../types/btc-details.types";
-import { PrismaClient } from 'src/database/prisma/prisma.type';
+import { PrismaClient } from 'src/core/database/prisma/prisma.type';
 
 
 @Injectable()

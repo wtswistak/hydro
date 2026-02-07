@@ -1,6 +1,6 @@
-import { PrismaService } from 'src/database/prisma/prisma.service';
+import { PrismaService } from 'src/core/database/prisma/prisma.service';
 import { Wallet } from '@prisma/client';
-import { PrismaClient } from 'src/database/prisma/prisma.type';
+import { PrismaClient } from 'src/core/database/prisma/prisma.type';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { MailersendService } from './mailersend.service';
-import { AppConfigService } from 'src/config/app-config.service';
+import { AppConfigService } from 'src/core/config/app-config.service';
 import { HttpModule } from '@nestjs/axios';
-import { AppConfigModule } from 'src/config/app-config.module';
+import { AppConfigModule } from 'src/core/config/app-config.module';
 import { BrevoApiService } from './brevo-api.service';
 
 @Module({

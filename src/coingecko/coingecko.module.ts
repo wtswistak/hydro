@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { CoingeckoController } from './coingecko.controller';
 import { CoingeckoService } from './coingecko.service';
 import { HttpModule } from '@nestjs/axios';
-import { AppConfigModule } from 'src/config/app-config.module';
-import { AppConfigService } from 'src/config/app-config.service';
-import { RedisModule } from 'src/database/redis/redis.module';
+import { AppConfigModule } from 'src/core/config/app-config.module';
+import { AppConfigService } from 'src/core/config/app-config.service';
+import { RedisModule } from 'src/core/database/redis/redis.module';
 
 @Module({
   imports: [

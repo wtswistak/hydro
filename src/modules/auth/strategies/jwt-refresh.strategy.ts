@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { JwtFromRequestFunction, Strategy } from 'passport-jwt';
-import { AppConfigService } from 'src/config/app-config.service';
+import { AppConfigService } from 'src/core/config/app-config.service';
 
 const cookieExtactor: JwtFromRequestFunction = (req) => {
   return req?.cookies?.refreshToken || null;

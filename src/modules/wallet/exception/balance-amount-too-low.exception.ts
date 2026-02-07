@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { BaseException } from 'src/common/exception/base-exception';
+import { BaseException } from 'src/core/exception/base-exception';
 
 export class BalanceAmountTooLowException extends BaseException {
   constructor() {

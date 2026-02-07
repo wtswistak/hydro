@@ -6,7 +6,7 @@ import {
   MempoolFeeEstimate,
   MempoolTransaction,
 } from './types/mempool-api.interface';
-import { AppConfigService } from 'src/config/app-config.service';
+import { AppConfigService } from 'src/core/config/app-config.service';
 
 @Injectable()
 export class MempoolApiService {

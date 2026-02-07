@@ -5,9 +5,9 @@ import {
   Logger,
   ValidationPipe,
 } from '@nestjs/common';
-import { HttpExceptionFilter } from './common/exception/http-exceptions.filter';
-import { AppConfigService } from './config/app-config.service';
-import { ApiKeyGuard } from './common/guard/api-key.guard';
+import { HttpExceptionFilter } from './core/exception/http-exceptions.filter';
+import { AppConfigService } from './core/config/app-config.service';
+import { ApiKeyGuard } from './core/guard/api-key.guard';
 import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {

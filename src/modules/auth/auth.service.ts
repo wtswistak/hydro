@@ -1,5 +1,5 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from 'src/database/prisma/prisma.service';
+import { PrismaService } from 'src/core/database/prisma/prisma.service';
 import * as crypto from 'crypto';
 import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
@@ -13,7 +13,7 @@ import { User } from '@prisma/client';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { NotificationService } from 'src/notification/notification.service';
 import { VerifyEmailDto } from './dto/verify-email.dto';
-import { AppConfigService } from 'src/config/app-config.service';
+import { AppConfigService } from 'src/core/config/app-config.service';
 import { REFRESH_TOKEN_EXPIRES_TIME } from 'src/common/constant';
 import { CreateToken, JWTTokens, TokenPayload } from './interface';
 import { WalletService } from 'src/modules/wallet/wallet.service';

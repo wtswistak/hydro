@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   BlockchainService
 } from 'src/blockchain/blockchain.service';
-import { PrismaService } from 'src/database/prisma/prisma.service';
+import { PrismaService } from 'src/core/database/prisma/prisma.service';
 import { CryptoService } from './crypto.service';
 import { Prisma, Wallet } from '@prisma/client';
 import { WalletExistsException } from './exception/wallet-exist.exception';
@@ -11,7 +11,7 @@ import { ChainNotExistsException } from './exception/chain-not-exists.exception'
 import { WalletNotExistsException } from './exception/wallet-not-exist.exception';
 import { GetEstimatedFeeDto } from './dto/get-estimated-fee.dto';
 import { WalletRepository } from './wallet.repository';
-import { PrismaClient } from 'src/database/prisma/prisma.type';
+import { PrismaClient } from 'src/core/database/prisma/prisma.type';
 import { CryptoTokenService } from 'src/modules/crypto-token/crypto-token.service';
 import { CryptoTokenNotExistException } from 'src/modules/crypto-token/exception/token-not-exist.exceptions';
 import { EstimatedFee } from 'src/blockchain/types/blockchain.types';

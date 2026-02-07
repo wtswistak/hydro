@@ -22,7 +22,7 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import { Response } from 'express';
 import { REFRESH_TOKEN_EXPIRES_TIME } from 'src/common/constant';
 import { AuthRequest } from 'src/utils/interface';
-import { AppConfigService } from 'src/config/app-config.service';
+import { AppConfigService } from 'src/core/config/app-config.service';
 
 @Controller('auth')
 export class AuthController {

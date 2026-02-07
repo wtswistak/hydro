@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { MailersendService } from './mailersend.service';
 import { SendVerificationEmail } from './interface/send-verification-email.interface';
 import { BrevoApiService } from './brevo-api.service';
-import { AppConfigService } from 'src/config/app-config.service';
+import { AppConfigService } from 'src/core/config/app-config.service';
 
 @Injectable()
 export class NotificationService {

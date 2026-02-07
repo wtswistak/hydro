@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { TransactionStatus } from '@prisma/client';
-import { PrismaService } from 'src/database/prisma/prisma.service';
+import { PrismaService } from 'src/core/database/prisma/prisma.service';
 import { TransactionService } from 'src/modules/transaction/transaction.service';
 import { WalletService } from 'src/modules/wallet/wallet.service';
 import { AlchemyAddressActivityDto } from './dto/AlchemyAddressActivityDto';

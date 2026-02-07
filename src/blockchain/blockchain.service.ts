@@ -1,7 +1,7 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { ethers, JsonRpcProvider } from 'ethers';
 import { ERC20_ABI } from './erc20.abi';
-import { AppConfigService } from 'src/config/app-config.service';
+import { AppConfigService } from 'src/core/config/app-config.service';
 import { SendTransactionDto } from './dto/send-transaction.dto';
 import {
   EstimatedFee,

@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { FeeSnapshot } from '@prisma/client';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
-import { PrismaService } from 'src/database/prisma/prisma.service';
+import { PrismaService } from 'src/core/database/prisma/prisma.service';
 
 @Injectable()
 export class FeeSnapshotService {

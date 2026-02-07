@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { WalletModule } from 'src/modules/wallet/wallet.module';
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
-import { AppConfigService } from 'src/config/app-config.service';
+import { AppConfigService } from 'src/core/config/app-config.service';
 import { NotificationModule } from 'src/notification/notification.module';
 import { JwtStrategy } from './strategies/jwt-strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
