@@ -63,6 +63,10 @@ export class BitcoinService {
     }
   }
 
+  async getTransaction(txid: string) {
+    return this.mempoolApi.getTransaction(txid);
+  }
+
   /**
    * Estimate transaction fee in satoshis
    * @param inputCount Number of UTXOs to spend

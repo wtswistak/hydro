@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import {
   MempoolUtxo,
   MempoolFeeEstimate,
+  MempoolTransaction,
 } from './types/mempool-api.interface';
 import { AppConfigService } from 'src/config/app-config.service';
 
@@ -67,6 +68,10 @@ export class MempoolApiService {
    */
   async broadcastTransaction(txHex: string): Promise<string> {
     return this.request<string>('/tx', 'POST', txHex);
+  }
+
+  async getTransaction(txid: string): Promise<MempoolTransaction> {
+    return this.request<MempoolTransaction>(`/tx/${txid}`);
   }
 
   /**
