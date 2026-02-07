@@ -10,6 +10,7 @@ import { CryptoService } from 'src/wallet/crypto.service';
 import { CreateTxDto } from 'src/wallet/dto/create-tx.dto';
 import { BalanceAmountTooLowException } from 'src/wallet/exception/balance-amount-too-low.exception';
 import { WalletNotMatchException } from 'src/wallet/exception/wallet-not-match.exception';
+import { InvalidAddressException } from './exception/invalid-address.exception';
 import { Decimal } from 'decimal.js';
 import { WalletService } from 'src/wallet/wallet.service';
 import { CreateEvmDetailsData, UpdateEvmDetailsData } from './types/evm-details.types';
@@ -104,6 +105,9 @@ export class TransactionService {
 
       // Handle based on Blockchain Type
       if (cryptoToken.blockchain.type === BlockchainType.BITCOIN) {
+        if (!this.bitcoinService.isValidAddress(receiverAddress)) {
+          throw new InvalidAddressException('Bitcoin');
+        }
         const amountSatoshis = Math.round(parseFloat(amount) * 100_000_000);
         const btcResult = await this.bitcoinService.sendTransaction(
           decryptedPrivateKey,

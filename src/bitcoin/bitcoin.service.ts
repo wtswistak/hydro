@@ -53,6 +53,16 @@ export class BitcoinService {
       publicKey: pubkeyBuffer.toString('hex'),
     };
   }
+
+  isValidAddress(address: string): boolean {
+    try {
+      bitcoin.address.toOutputScript(address, NETWORK);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   /**
    * Estimate transaction fee in satoshis
    * @param inputCount Number of UTXOs to spend
