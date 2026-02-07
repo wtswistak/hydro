@@ -6,8 +6,8 @@ import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { CoingeckoService } from 'src/coingecko/coingecko.service';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { PrismaClient } from 'src/database/prisma/prisma.type';
-import { BalanceNotExistException } from 'src/wallet/exception/balance-not-exist.exception';
-import { WalletService } from 'src/wallet/wallet.service';
+import { BalanceNotExistException } from 'src/modules/wallet/exception/balance-not-exist.exception';
+import { WalletService } from 'src/modules/wallet/wallet.service';
 
 @Injectable()
 export class BalanceService {

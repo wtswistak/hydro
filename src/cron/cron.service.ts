@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { FeeSnapshotService } from 'src/fee-snapshot/fee-snapshot.service';
+import { FeeSnapshotService } from 'src/modules/fee-snapshot/fee-snapshot.service';
 
 @Injectable()
 export class CronService {

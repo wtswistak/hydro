@@ -4,7 +4,7 @@ import { BlockchainType, TransactionStatus } from '@prisma/client';
 import { Job } from 'bullmq';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { CoingeckoService } from 'src/coingecko/coingecko.service';
-import { TransactionService } from 'src/transaction/transaction.service';
+import { TransactionService } from 'src/modules/transaction/transaction.service';
 import { BitcoinService } from 'src/bitcoin/bitcoin.service';
 import { Decimal } from 'decimal.js';
 

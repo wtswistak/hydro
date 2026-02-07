@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { WebhookController } from './webhook.controller';
 import { WebhookService } from './webhook.service';
-import { TransactionModule } from 'src/transaction/transaction.module';
-import { WalletModule } from 'src/wallet/wallet.module';
-import { BalanceService } from 'src/balance/balance.service';
+import { TransactionModule } from 'src/modules/transaction/transaction.module';
+import { WalletModule } from 'src/modules/wallet/wallet.module';
+import { BalanceService } from 'src/modules/balance/balance.service';
 import { CoingeckoModule } from 'src/coingecko/coingecko.module';
 import { BlockchainModule } from 'src/blockchain/blockchain.module';
-import { BalanceModule } from 'src/balance/balance.module';
+import { BalanceModule } from 'src/modules/balance/balance.module';
 
 @Module({
   imports: [

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { WalletModule } from 'src/wallet/wallet.module';
+import { WalletModule } from 'src/modules/wallet/wallet.module';
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { AppConfigService } from 'src/config/app-config.service';

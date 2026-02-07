@@ -10,7 +10,7 @@ import { TransactionService } from './transaction.service';
 import { AuthGuard } from '@nestjs/passport';
 import { BigIntInterceptor } from 'src/common/interceptor/big-int.interceptor';
 import { AuthRequest } from 'src/utils/interface';
-import { CreateTxDto } from 'src/wallet/dto/create-tx.dto';
+import { CreateTxDto } from 'src/modules/wallet/dto/create-tx.dto';
 import { Transaction } from '@prisma/client';
 
 @Controller('transaction')

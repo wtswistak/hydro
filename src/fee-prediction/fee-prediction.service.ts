@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { FeeSnapshotService } from 'src/fee-snapshot/fee-snapshot.service';
+import { FeeSnapshotService } from 'src/modules/fee-snapshot/fee-snapshot.service';
 import { FeePrediction } from './interface/get-fee-prediction.interface';
 import { FeePredictionApiService } from './fee-prediction-api.service';
 

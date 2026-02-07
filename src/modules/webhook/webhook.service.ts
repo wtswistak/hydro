@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { TransactionStatus } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma/prisma.service';
-import { TransactionService } from 'src/transaction/transaction.service';
-import { WalletService } from 'src/wallet/wallet.service';
+import { TransactionService } from 'src/modules/transaction/transaction.service';
+import { WalletService } from 'src/modules/wallet/wallet.service';
 import { AlchemyAddressActivityDto } from './dto/AlchemyAddressActivityDto';
-import { BalanceService } from 'src/balance/balance.service';
+import { BalanceService } from 'src/modules/balance/balance.service';
 import { BlockchainService } from 'src/blockchain/blockchain.service';
 import { CoingeckoService } from 'src/coingecko/coingecko.service';
 

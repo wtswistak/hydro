@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { FeePredictionController } from './fee-prediction.controller';
 import { FeePredictionService } from './fee-prediction.service';
-import { FeeSnapshotModule } from 'src/fee-snapshot/fee-snapshot.module';
+import { FeeSnapshotModule } from 'src/modules/fee-snapshot/fee-snapshot.module';
 import { HttpModule } from '@nestjs/axios';
 import { AppConfigModule } from 'src/config/app-config.module';
 import { AppConfigService } from 'src/config/app-config.service';

@@ -4,7 +4,7 @@ import { WalletService } from './wallet.service';
 import { AppConfigService } from 'src/config/app-config.service';
 import { CryptoService } from './crypto.service';
 import { WalletRepository } from './wallet.repository';
-import { CryptoTokenService } from 'src/crypto-token/crypto-token.service';
+import { CryptoTokenService } from 'src/modules/crypto-token/crypto-token.service';
 import { BlockchainModule } from 'src/blockchain/blockchain.module';
 
 @Module({

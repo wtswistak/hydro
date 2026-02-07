@@ -16,7 +16,7 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import { AppConfigService } from 'src/config/app-config.service';
 import { REFRESH_TOKEN_EXPIRES_TIME } from 'src/common/constant';
 import { CreateToken, JWTTokens, TokenPayload } from './interface';
-import { WalletService } from 'src/wallet/wallet.service';
+import { WalletService } from 'src/modules/wallet/wallet.service';
 import { EmailNotVerifiedException } from './exception/email-not-verified.exception';
 
 @Injectable()
