@@ -18,6 +18,7 @@ import { BitcoinService } from 'src/bitcoin/bitcoin.service';
 import { BlockchainType } from '@prisma/client';
 import { CreateTransactionData } from './types/transaction.types';
 import { BtcTxDetailsRepository } from './repository/btc-tx-details.repository';
+import { CreateBtcDetailsData } from './types/btc-details.types';
 
 @Injectable()
 export class TransactionService {
@@ -228,6 +229,30 @@ export class TransactionService {
     });
   }
 
+  async updateTxWithBtcDetails({
+    txId,
+    txData,
+    btcData,
+  }: {
+    txId: number;
+    txData: Partial<Pick<Transaction, 'status' | 'blockRef' | 'cryptoFee' | 'fiatFee'>>;
+    btcData: Partial<CreateBtcDetailsData>;
+  }) {
+    return this.prisma.$transaction(async (prisma) => {
+      const tx = await prisma.transaction.update({
+        where: { id: txId },
+        data: txData,
+      });
+
+      const btcDetails = await prisma.btcTxDetails.update({
+        where: { transactionId: txId },
+        data: btcData,
+      });
+
+      return { tx, btcDetails };
+    });
+  }
+
   createTx(data: CreateTransactionData, prisma: PrismaClient = this.prisma) {
     return prisma.transaction.create({
       data: {
@@ -262,7 +287,7 @@ export class TransactionService {
   getTxByHash({ hash }: { hash: string }) {
     return this.prisma.transaction.findUnique({
       where: { hash },
-      include: { evmDetails: true },
+      include: { evmDetails: true, btcDetails: true, blockchain: true },
     });
   }
 }
