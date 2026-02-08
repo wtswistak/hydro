@@ -20,7 +20,7 @@ import { plainToClass } from 'class-transformer';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { Response } from 'express';
-import { REFRESH_TOKEN_EXPIRES_TIME } from 'src/common/constant';
+import { REFRESH_TOKEN_EXPIRES_TIME } from 'src/core/constant';
 import { AuthRequest } from 'src/utils/interface';
 import { AppConfigService } from 'src/core/config/app-config.service';
 
