@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   BlockchainService
-} from 'src/blockchain/blockchain.service';
+} from 'src/integrations/blockchain/blockchain.service';
 import { PrismaService } from 'src/core/database/prisma/prisma.service';
 import { CryptoService } from './crypto.service';
 import { Prisma, Wallet } from '@prisma/client';
@@ -14,7 +14,7 @@ import { WalletRepository } from './wallet.repository';
 import { PrismaClient } from 'src/core/database/prisma/prisma.type';
 import { CryptoTokenService } from 'src/modules/crypto-token/crypto-token.service';
 import { CryptoTokenNotExistException } from 'src/modules/crypto-token/exception/token-not-exist.exceptions';
-import { EstimatedFee } from 'src/blockchain/types/blockchain.types';
+import { EstimatedFee } from 'src/integrations/blockchain/types/blockchain.types';
 
 @Injectable()
 export class WalletService {

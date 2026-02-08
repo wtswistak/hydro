@@ -5,7 +5,7 @@ import { AppConfigService } from 'src/core/config/app-config.service';
 import { CryptoService } from './crypto.service';
 import { WalletRepository } from './wallet.repository';
 import { CryptoTokenService } from 'src/modules/crypto-token/crypto-token.service';
-import { BlockchainModule } from 'src/blockchain/blockchain.module';
+import { BlockchainModule } from 'src/integrations/blockchain/blockchain.module';
 
 @Module({
   imports: [BlockchainModule],

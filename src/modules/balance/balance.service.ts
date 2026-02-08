@@ -2,8 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Balance, Prisma } from '@prisma/client';
 import Decimal from 'decimal.js';
 
-import { BlockchainService } from 'src/blockchain/blockchain.service';
-import { CoingeckoService } from 'src/coingecko/coingecko.service';
+import { BlockchainService } from 'src/integrations/blockchain/blockchain.service';
+import { CoingeckoService } from 'src/integrations/coingecko/coingecko.service';
 import { PrismaService } from 'src/core/database/prisma/prisma.service';
 import { PrismaClient } from 'src/core/database/prisma/prisma.type';
 import { BalanceNotExistException } from 'src/modules/wallet/exception/balance-not-exist.exception';

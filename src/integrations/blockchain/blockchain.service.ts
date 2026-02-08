@@ -9,7 +9,7 @@ import {
   SendTransactionPayload,
 } from './types/blockchain.types';
 import { Decimal } from 'decimal.js';
-import { BitcoinService } from 'src/bitcoin/bitcoin.service';
+import { BitcoinService } from 'src/integrations/bitcoin/bitcoin.service';
 import { BlockchainType } from '@prisma/client';
 
 @Injectable()

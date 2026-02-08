@@ -2,10 +2,10 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { BlockchainType, TransactionStatus } from '@prisma/client';
 import { Job } from 'bullmq';
-import { BlockchainService } from 'src/blockchain/blockchain.service';
-import { CoingeckoService } from 'src/coingecko/coingecko.service';
+import { BlockchainService } from 'src/integrations/blockchain/blockchain.service';
+import { CoingeckoService } from 'src/integrations/coingecko/coingecko.service';
 import { TransactionService } from 'src/modules/transaction/transaction.service';
-import { BitcoinService } from 'src/bitcoin/bitcoin.service';
+import { BitcoinService } from 'src/integrations/bitcoin/bitcoin.service';
 import { Decimal } from 'decimal.js';
 
 @Processor('transaction')

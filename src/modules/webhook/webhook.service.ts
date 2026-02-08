@@ -5,8 +5,8 @@ import { TransactionService } from 'src/modules/transaction/transaction.service'
 import { WalletService } from 'src/modules/wallet/wallet.service';
 import { AlchemyAddressActivityDto } from './dto/AlchemyAddressActivityDto';
 import { BalanceService } from 'src/modules/balance/balance.service';
-import { BlockchainService } from 'src/blockchain/blockchain.service';
-import { CoingeckoService } from 'src/coingecko/coingecko.service';
+import { BlockchainService } from 'src/integrations/blockchain/blockchain.service';
+import { CoingeckoService } from 'src/integrations/coingecko/coingecko.service';
 
 @Injectable()
 export class WebhookService {
