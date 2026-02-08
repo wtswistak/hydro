@@ -2,7 +2,7 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { BlockchainType, TransactionStatus } from '@prisma/client';
 import { Job } from 'bullmq';
-import { BlockchainService } from 'src/integrations/blockchain/blockchain.service';
+import { EvmService } from 'src/integrations/evm/evm.service';
 import { CoingeckoService } from 'src/integrations/coingecko/coingecko.service';
 import { TransactionService } from 'src/modules/transaction/transaction.service';
 import { BitcoinService } from 'src/integrations/bitcoin/bitcoin.service';
@@ -12,7 +12,7 @@ import { Decimal } from 'decimal.js';
 export class TransactionWorker extends WorkerHost {
   private readonly logger = new Logger(TransactionWorker.name);
   constructor(
-    private readonly blockchainService: BlockchainService,
+    private readonly evmService: EvmService,
     private readonly coingeckoService: CoingeckoService,
     private readonly transactionService: TransactionService,
     private readonly bitcoinService: BitcoinService,
@@ -48,7 +48,7 @@ export class TransactionWorker extends WorkerHost {
   }
 
   private async processEvmTransaction(txHash: string, txId: number) {
-    const receipt = await this.blockchainService.getTransactionReceipt({
+    const receipt = await this.evmService.getTransactionReceipt({
       txHash,
     });
 
@@ -70,7 +70,7 @@ export class TransactionWorker extends WorkerHost {
       );
     }
 
-    const ethFee = this.blockchainService.calculateFee({
+    const ethFee = this.evmService.calculateFee({
       gasUsed: receipt.gasUsed,
       gasPrice: receipt.gasPrice,
     });

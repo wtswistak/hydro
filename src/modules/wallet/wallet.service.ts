@@ -14,7 +14,7 @@ import { WalletRepository } from './wallet.repository';
 import { PrismaClient } from 'src/core/database/prisma/prisma.type';
 import { CryptoTokenService } from 'src/modules/crypto-token/crypto-token.service';
 import { CryptoTokenNotExistException } from 'src/modules/crypto-token/exception/token-not-exist.exceptions';
-import { EstimatedFee } from 'src/integrations/blockchain/types/blockchain.types';
+import { EstimatedFee } from 'src/integrations/evm/types/evm.types';
 
 @Injectable()
 export class WalletService {

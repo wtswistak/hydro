@@ -5,8 +5,9 @@ import { TransactionService } from 'src/modules/transaction/transaction.service'
 import { WalletService } from 'src/modules/wallet/wallet.service';
 import { AlchemyAddressActivityDto } from './dto/AlchemyAddressActivityDto';
 import { BalanceService } from 'src/modules/balance/balance.service';
-import { BlockchainService } from 'src/integrations/blockchain/blockchain.service';
+import { EvmService } from 'src/integrations/evm/evm.service';
 import { CoingeckoService } from 'src/integrations/coingecko/coingecko.service';
+import { EvmTxDetailsRepository } from 'src/modules/transaction/repository/evm-tx-details.repository';
 
 @Injectable()
 export class WebhookService {
@@ -16,8 +17,9 @@ export class WebhookService {
     private readonly prisma: PrismaService,
     private readonly walletService: WalletService,
     private readonly balanceService: BalanceService,
-    private readonly blockchainService: BlockchainService,
+    private readonly evmService: EvmService,
     private readonly coingeckoService: CoingeckoService,
+    private readonly evmTxDetailsRepository: EvmTxDetailsRepository,
   ) {}
 
   async handleAlchemyWebhook(
@@ -98,11 +100,11 @@ export class WebhookService {
       );
       this.logger.log(`Transaction created with id: ${tx.id}`);
 
-      const txReceipt = await this.blockchainService.getTransactionReceipt({
+      const txReceipt = await this.evmService.getTransactionReceipt({
         txHash: activity[0].hash,
       });
 
-      await this.transactionService.createEvmDetails(
+      await this.evmTxDetailsRepository.createEvmTxDetails(
         {
           transactionId: tx.id,
           gasUsed: txReceipt.gasUsed,
@@ -111,7 +113,7 @@ export class WebhookService {
         prismaTx,
       );
 
-      const ethFee = this.blockchainService.calculateFee({
+      const ethFee = this.evmService.calculateFee({
         gasUsed: txReceipt.gasUsed,
         gasPrice: txReceipt.gasPrice,
       });

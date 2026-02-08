@@ -3,7 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Prisma, Transaction, TransactionStatus } from '@prisma/client';
 import { Queue } from 'bullmq';
 import { BalanceService } from 'src/modules/balance/balance.service';
-import { BlockchainService } from 'src/integrations/blockchain/blockchain.service';
+import { EvmService } from 'src/integrations/evm/evm.service';
 import { PrismaService } from 'src/core/database/prisma/prisma.service';
 import { PrismaClient } from 'src/core/database/prisma/prisma.type';
 import { CryptoService } from 'src/modules/wallet/crypto.service';
@@ -13,11 +13,12 @@ import { WalletNotMatchException } from 'src/modules/wallet/exception/wallet-not
 import { InvalidAddressException } from './exception/invalid-address.exception';
 import { Decimal } from 'decimal.js';
 import { WalletService } from 'src/modules/wallet/wallet.service';
-import { CreateEvmDetailsData, UpdateEvmDetailsData } from './types/evm-details.types';
+import { UpdateEvmDetailsData } from './types/evm-details.types';
 import { BitcoinService } from 'src/integrations/bitcoin/bitcoin.service';
 import { BlockchainType } from '@prisma/client';
 import { CreateTransactionData } from './types/transaction.types';
 import { BtcTxDetailsRepository } from './repository/btc-tx-details.repository';
+import { EvmTxDetailsRepository } from './repository/evm-tx-details.repository';
 import { CreateBtcDetailsData } from './types/btc-details.types';
 
 @Injectable()
@@ -26,11 +27,12 @@ export class TransactionService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly walletService: WalletService,
-    private readonly blockchainService: BlockchainService,
+    private readonly evmService: EvmService,
     private readonly bitcoinService: BitcoinService,
     private readonly cryptoService: CryptoService,
     private readonly balanceService: BalanceService,
     private readonly btcTxDetailsRepository: BtcTxDetailsRepository,
+    private readonly evmTxDetailsRepository: EvmTxDetailsRepository,
     @InjectQueue('transaction')
     private readonly transactionQueue: Queue,
   ) {}
@@ -121,7 +123,7 @@ export class TransactionService {
         };
       }
       if (cryptoToken.blockchain.type === BlockchainType.EVM) {
-        const blockchainTx = await this.blockchainService.sendTransaction({
+        const blockchainTx = await this.evmService.sendTransaction({
           receiverAddress,
           amount,
           privateKey: decryptedPrivateKey,
@@ -151,7 +153,7 @@ export class TransactionService {
       this.logger.log(`Transaction created with id: ${tx.id}`);
 
       if (evmTxData) {
-        await this.createEvmDetails(
+        await this.evmTxDetailsRepository.createEvmTxDetails(
           {
             transactionId: tx.id,
             ...evmTxData
@@ -220,10 +222,11 @@ export class TransactionService {
         data: txData,
       });
 
-      const evmDetails = await prisma.evmTxDetails.update({
-        where: { transactionId: txId },
-        data: evmData,
-      });
+      const evmDetails = await this.evmTxDetailsRepository.updateEvmTxDetails(
+        txId,
+        evmData,
+        prisma,
+      );
 
       return { tx, evmDetails };
     });
@@ -264,22 +267,6 @@ export class TransactionService {
         blockchainId: data.blockchainId,
         senderBalanceId: data.senderBalanceId,
         receiverBalanceId: data.receiverBalanceId,
-      },
-    });
-  }
-
-  createEvmDetails(
-    data: CreateEvmDetailsData,
-    prisma: PrismaClient = this.prisma,
-  ) {
-    return prisma.evmTxDetails.create({
-      data: {
-        transactionId: data.transactionId,
-        nonce: data.nonce,
-        gasLimit: data.gasLimit,
-        gasPrice: data.gasPrice,
-        effectiveGasPrice: data.effectiveGasPrice,
-        gasUsed: data.gasUsed,
       },
     });
   }

@@ -1,17 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { FeeSnapshot } from '@prisma/client';
-import { BlockchainService } from 'src/integrations/blockchain/blockchain.service';
+import { EvmService } from 'src/integrations/evm/evm.service';
 import { PrismaService } from 'src/core/database/prisma/prisma.service';
 
 @Injectable()
 export class FeeSnapshotService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly blockchainService: BlockchainService,
+    private readonly evmService: EvmService,
   ) {}
 
   async createFeeSnapshotJob() {
-    const feeHistory = await this.blockchainService.getFeeHistory(
+    const feeHistory = await this.evmService.getFeeHistory(
       50,
       [10, 50, 90],
     );

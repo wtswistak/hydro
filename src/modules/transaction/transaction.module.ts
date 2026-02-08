@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { TransactionController } from './transaction.controller';
 import { BullQueueModule } from 'src/jobs/bull-mq/bull-mq.module';
-import { BlockchainService } from 'src/integrations/blockchain/blockchain.service';
 import { CryptoService } from 'src/modules/wallet/crypto.service';
 import { WalletService } from 'src/modules/wallet/wallet.service';
 import { AppConfigService } from 'src/core/config/app-config.service';
@@ -14,6 +13,8 @@ import { BitcoinModule } from 'src/integrations/bitcoin/bitcoin.module';
 import { BlockchainModule } from 'src/integrations/blockchain/blockchain.module';
 import { BalanceModule } from 'src/modules/balance/balance.module';
 import { BtcTxDetailsRepository } from './repository/btc-tx-details.repository';
+import { EvmTxDetailsRepository } from './repository/evm-tx-details.repository';
+import { EvmModule } from 'src/integrations/evm/evm.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { BtcTxDetailsRepository } from './repository/btc-tx-details.repository';
     BlockchainModule,
     BitcoinModule,
     BalanceModule,
+    EvmModule,
   ],
   controllers: [TransactionController],
   providers: [
@@ -30,6 +32,7 @@ import { BtcTxDetailsRepository } from './repository/btc-tx-details.repository';
     TransactionService,
     TransactionWorker,
     BtcTxDetailsRepository,
+    EvmTxDetailsRepository,
   ],
   exports: [TransactionService],
 })

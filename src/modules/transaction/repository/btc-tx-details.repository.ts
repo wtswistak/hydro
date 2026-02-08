@@ -16,4 +16,24 @@ export class BtcTxDetailsRepository {
       data,
     });
   }
+
+  async updateBtcTxDetails(
+    transactionId: number,
+    data: Partial<CreateBtcDetailsData>,
+    prismaTx: PrismaClient = this.prisma,
+  ) {
+    return prismaTx.btcTxDetails.update({
+      where: { transactionId },
+      data,
+    });
+  }
+
+  async getBtcTxDetails(
+    transactionId: number,
+    prismaTx: PrismaClient = this.prisma,
+  ) {
+    return prismaTx.btcTxDetails.findUnique({
+      where: { transactionId },
+    });
+  }
 }

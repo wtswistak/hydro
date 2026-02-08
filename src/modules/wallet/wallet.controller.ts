@@ -13,7 +13,7 @@ import { CreateWalletDto } from './dto/create-wallet.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthRequest } from 'src/utils/interface';
 import { GetEstimatedFeeDto } from './dto/get-estimated-fee.dto';
-import { EstimatedFee } from 'src/integrations/blockchain/types/blockchain.types';
+import { EstimatedFee } from 'src/integrations/evm/types/evm.types';
 
 @Controller('wallet')
 export class WalletController {
