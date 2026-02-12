@@ -4,17 +4,13 @@ import {
 } from 'src/integrations/blockchain/blockchain.service';
 import { PrismaService } from 'src/core/database/prisma/prisma.service';
 import { CryptoService } from './crypto.service';
-import { Prisma, Wallet } from '@prisma/client';
+import { Wallet } from '@prisma/client';
 import { WalletExistsException } from './exception/wallet-exist.exception';
 import { CreateWalletDto } from './dto/create-wallet.dto';
 import { ChainNotExistsException } from './exception/chain-not-exists.exception';
 import { WalletNotExistsException } from './exception/wallet-not-exist.exception';
-import { GetEstimatedFeeDto } from './dto/get-estimated-fee.dto';
 import { WalletRepository } from './wallet.repository';
 import { PrismaClient } from 'src/core/database/prisma/prisma.type';
-import { CryptoTokenService } from 'src/modules/crypto-token/crypto-token.service';
-import { CryptoTokenNotExistException } from 'src/modules/crypto-token/exception/token-not-exist.exceptions';
-import { EstimatedFee } from 'src/integrations/evm/types/evm.types';
 
 @Injectable()
 export class WalletService {
@@ -24,7 +20,6 @@ export class WalletService {
     private blockchainService: BlockchainService,
     private cryptoService: CryptoService,
     private walletRepository: WalletRepository,
-    private cryptoTokenService: CryptoTokenService,
   ) {}
 
   async createWallet({
@@ -148,50 +143,6 @@ export class WalletService {
 
     this.logger.log(`Successfully created ${createdWallets.length} wallets`);
     return createdWallets;
-  }
-
-  async getEstimatedFee({
-    receiverAddress,
-    amount,
-    cryptoSymbol,
-    userId,
-  }: GetEstimatedFeeDto & { userId: number }): Promise<EstimatedFee> {
-    const cryptoToken = await this.cryptoTokenService.getCryptoTokenBySymbol({
-      symbol: cryptoSymbol,
-    });
-    this.logger.log(`Getting estimated fee for ${cryptoSymbol}`);
-
-    if (!cryptoToken) {
-      throw new CryptoTokenNotExistException();
-    }
-
-    const wallet = await this.walletRepository.getWalletByUserAndBlockchain({
-      userId,
-      blockchainId: cryptoToken.blockchainId,
-    });
-
-    if (!wallet) {
-      throw new WalletNotExistsException();
-    }
-
-    const blockchain = await this.prisma.blockchain.findUnique({
-      where: { id: cryptoToken.blockchainId },
-    });
-
-    const estimatedFee = await this.blockchainService.estimateFee({
-      receiverAddress,
-      amount,
-      contractAddress: cryptoToken.contractAddress,
-      decimals: cryptoToken.decimals,
-      senderAddress: wallet.address,
-      type: blockchain.type,
-    });
-
-    this.logger.log(
-      `Estimated fee for ${cryptoSymbol}: ${estimatedFee.feeInCrypto}`,
-    );
-
-    return estimatedFee;
   }
 
   async getWalletById(

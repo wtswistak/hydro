@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
+  Query,
   Req,
   UseGuards,
   UseInterceptors,
@@ -12,6 +14,8 @@ import { BigIntInterceptor } from 'src/core/interceptor/big-int.interceptor';
 import { AuthRequest } from 'src/utils/interface';
 import { CreateTxDto } from 'src/modules/wallet/dto/create-tx.dto';
 import { Transaction } from '@prisma/client';
+import { EstimatedFee } from 'src/integrations/evm/types/evm.types';
+import { GetEstimatedFeeDto } from './dto/get-estimated-fee.dto';
 
 @Controller('transaction')
 export class TransactionController {
@@ -28,6 +32,19 @@ export class TransactionController {
     return this.transactionService.createTransaction({
       userId,
       ...createTxDto,
+    });
+  }
+
+  @Get('fee/estimated')
+  @UseGuards(AuthGuard('jwt'))
+  getEstimatedFee(
+    @Query() EstimatedFeeDto: GetEstimatedFeeDto,
+    @Req() req: AuthRequest,
+  ): Promise<EstimatedFee> {
+    const userId = req.user.id;
+    return this.transactionService.getEstimatedFee({
+      ...EstimatedFeeDto,
+      userId,
     });
   }
 }

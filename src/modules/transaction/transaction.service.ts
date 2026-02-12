@@ -20,6 +20,13 @@ import { CreateTransactionData } from './types/transaction.types';
 import { BtcTxDetailsRepository } from './repository/btc-tx-details.repository';
 import { EvmTxDetailsRepository } from './repository/evm-tx-details.repository';
 import { CreateBtcDetailsData } from './types/btc-details.types';
+import { BlockchainService } from 'src/integrations/blockchain/blockchain.service';
+import { CryptoTokenService } from 'src/modules/crypto-token/crypto-token.service';
+import { WalletRepository } from 'src/modules/wallet/wallet.repository';
+import { GetEstimatedFeeDto } from './dto/get-estimated-fee.dto';
+import { EstimatedFee } from 'src/integrations/evm/types/evm.types';
+import { CryptoTokenNotExistException } from 'src/modules/crypto-token/exception/token-not-exist.exceptions';
+import { WalletNotExistsException } from 'src/modules/wallet/exception/wallet-not-exist.exception';
 
 @Injectable()
 export class TransactionService {
@@ -33,6 +40,9 @@ export class TransactionService {
     private readonly balanceService: BalanceService,
     private readonly btcTxDetailsRepository: BtcTxDetailsRepository,
     private readonly evmTxDetailsRepository: EvmTxDetailsRepository,
+    private readonly blockchainService: BlockchainService,
+    private readonly cryptoTokenService: CryptoTokenService,
+    private readonly walletRepository: WalletRepository,
     @InjectQueue('transaction')
     private readonly transactionQueue: Queue,
   ) {}
@@ -276,5 +286,49 @@ export class TransactionService {
       where: { hash },
       include: { evmDetails: true, btcDetails: true, blockchain: true },
     });
+  }
+
+  async getEstimatedFee({
+    receiverAddress,
+    amount,
+    cryptoSymbol,
+    userId,
+  }: GetEstimatedFeeDto & { userId: number }): Promise<EstimatedFee> {
+    const cryptoToken = await this.cryptoTokenService.getCryptoTokenBySymbol({
+      symbol: cryptoSymbol,
+    });
+    this.logger.log(`Getting estimated fee for ${cryptoSymbol}`);
+
+    if (!cryptoToken) {
+      throw new CryptoTokenNotExistException();
+    }
+
+    const wallet = await this.walletRepository.getWalletByUserAndBlockchain({
+      userId,
+      blockchainId: cryptoToken.blockchainId,
+    });
+
+    if (!wallet) {
+      throw new WalletNotExistsException();
+    }
+
+    const blockchain = await this.prisma.blockchain.findUnique({
+      where: { id: cryptoToken.blockchainId },
+    });
+
+    const estimatedFee = await this.blockchainService.estimateFee({
+      receiverAddress,
+      amount,
+      contractAddress: cryptoToken.contractAddress,
+      decimals: cryptoToken.decimals,
+      senderAddress: wallet.address,
+      type: blockchain.type,
+    });
+
+    this.logger.log(
+      `Estimated fee for ${cryptoSymbol}: ${estimatedFee.feeInCrypto}`,
+    );
+
+    return estimatedFee;
   }
 }
