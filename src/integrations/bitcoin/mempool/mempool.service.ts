@@ -5,20 +5,13 @@ import {
   MempoolUtxo,
   MempoolFeeEstimate,
   MempoolTransaction,
-} from './types/mempool-api.interface';
-import { AppConfigService } from 'src/core/config/app-config.service';
+} from '../types/mempool-api.interface';
 
 @Injectable()
-export class MempoolApiService {
-  private readonly logger = new Logger(MempoolApiService.name);
-  private readonly baseUrl: string;
+export class MempoolService {
+  private readonly logger = new Logger(MempoolService.name);
 
-  constructor(
-    private readonly httpService: HttpService,
-    private readonly appConfigService: AppConfigService,
-  ) {
-    this.baseUrl = this.appConfigService.mempoolApiUrl;
-  }
+  constructor(private readonly httpService: HttpService) {}
 
   private async request<T>(
     endpoint: string,
@@ -26,19 +19,18 @@ export class MempoolApiService {
     payload?: string,
   ): Promise<T> {
     try {
-      const url = `${this.baseUrl}${endpoint}`;
-      this.logger.debug(`${method} ${url}`);
+      this.logger.debug(`${method} ${endpoint}`);
 
       if (method === 'POST') {
         const response = await firstValueFrom(
-          this.httpService.post<T>(url, payload, {
+          this.httpService.post<T>(endpoint, payload, {
             headers: { 'Content-Type': 'text/plain' },
           }),
         );
         return response.data;
       }
 
-      const response = await firstValueFrom(this.httpService.get<T>(url));
+      const response = await firstValueFrom(this.httpService.get<T>(endpoint));
       return response.data;
     } catch (error) {
       this.logger.error(`Mempool API error: ${error.message}`);
@@ -48,6 +40,7 @@ export class MempoolApiService {
       );
     }
   }
+
   /**
    * Get UTXOs for an address (needed for building transactions)
    */

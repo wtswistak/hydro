@@ -4,7 +4,7 @@ import * as ecc from 'tiny-secp256k1';
 import { BIP32Factory } from 'bip32';
 import * as bip39 from 'bip39';
 import ECPairFactory from 'ecpair';
-import { MempoolApiService } from './mempool-api.service';
+import { MempoolService } from './mempool/mempool.service';
 import { BitcoinWallet } from './types/bitcoin.types';
 
 bitcoin.initEccLib(ecc);
@@ -23,7 +23,7 @@ export interface BitcoinTransactionResult {
 export class BitcoinService {
   private readonly logger = new Logger(BitcoinService.name);
 
-  constructor(private readonly mempoolApi: MempoolApiService) {}
+  constructor(private readonly mempoolApi: MempoolService) {}
 
   createWallet(): BitcoinWallet {
     // Generate random mnemonic (12 words is standard, 24 needs wordlist param)

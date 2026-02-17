@@ -1,13 +1,11 @@
 import { Module } from '@nestjs/common';
-import { HttpModule } from '@nestjs/axios';
 import { BitcoinService } from './bitcoin.service';
-import { MempoolApiService } from './mempool-api.service';
-import { AppConfigService } from 'src/core/config/app-config.service';
+import { MempoolModule } from './mempool/mempool.module';
 
 @Module({
-  imports: [HttpModule],
-  providers: [BitcoinService, MempoolApiService, AppConfigService],
-  exports: [BitcoinService, MempoolApiService],
+  imports: [MempoolModule],
+  providers: [BitcoinService],
+  exports: [BitcoinService],
 })
 export class BitcoinModule {}
 
