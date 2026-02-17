@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { CoingeckoController } from './coingecko.controller';
 import { CoingeckoService } from './coingecko.service';
 import { HttpModule } from '@nestjs/axios';
 import { AppConfigModule } from 'src/core/config/app-config.module';
@@ -19,7 +18,7 @@ import { RedisModule } from 'src/core/database/redis/redis.module';
       inject: [AppConfigService],
     }),
   ],
-  controllers: [CoingeckoController],
+  controllers: [],
   providers: [CoingeckoService],
   exports: [CoingeckoService, HttpModule, RedisModule],
 })

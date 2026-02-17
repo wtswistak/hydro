@@ -5,15 +5,15 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { CoingeckoService } from './coingecko.service';
 import { AuthGuard } from '@nestjs/passport';
-import { MarketChartDto } from './dto/market-chart.dto';
-import { MarketChart } from './interface/market-chart-response';
-import { Cryptocurrency } from './interface/cryptocurrency.interface';
+import { CoingeckoService } from 'src/integrations/coingecko/coingecko.service';
+import { MarketChartDto } from 'src/integrations/coingecko/dto/market-chart.dto';
+import { Cryptocurrency } from 'src/integrations/coingecko/interface/cryptocurrency.interface';
+import { MarketChart } from 'src/integrations/coingecko/interface/market-chart-response';
 import { BigIntInterceptor } from 'src/core/interceptor/big-int.interceptor';
 
-@Controller('coingecko')
-export class CoingeckoController {
+@Controller('market')
+export class MarketController {
   constructor(private readonly coingeckoService: CoingeckoService) {}
 
   @UseInterceptors(BigIntInterceptor)
@@ -24,16 +24,19 @@ export class CoingeckoController {
   }
 
   @UseInterceptors(BigIntInterceptor)
-  @Get('market-chart/:id/:days')
+  @Get('chart/:id/:days')
   @UseGuards(AuthGuard('jwt'))
   getMarketChart(@Param() params: MarketChartDto): Promise<MarketChart> {
     return this.coingeckoService.getMarketChart(params);
   }
+
   @UseInterceptors(BigIntInterceptor)
-  @Get('cryptocurrency/rate/:id')
+  @Get('rate/:id')
   @UseGuards(AuthGuard('jwt'))
   async getCryptocurrencyRate(@Param('id') id: string): Promise<{ rate: string }> {
-    const rate = await this.coingeckoService.getCryptocurrencyRate({ id: id.toLowerCase() });
+    const rate = await this.coingeckoService.getCryptocurrencyRate({
+      id: id.toLowerCase(),
+    });
     return { rate };
   }
 }
