@@ -42,6 +42,8 @@ model Wallet {
   blockchain      Blockchain @relation(fields: [blockchainId], references: [id], onDelete: Cascade)
   balances        Balance[]
 
+  @@index([userId])
+  @@index([blockchainId])
   @@map("wallet")
 }
 
@@ -56,6 +58,7 @@ model SessionToken {
 
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("session_token")
 }
 
@@ -71,6 +74,7 @@ model EmailVerification {
 
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("email_verification")
 }
 
@@ -96,6 +100,9 @@ model Transaction {
   evmDetails        EvmTxDetails?
   btcDetails        BtcTxDetails?
 
+  @@index([senderBalanceId])
+  @@index([receiverBalanceId])
+  @@index([blockchainId])
   @@map("transaction")
 }
 
@@ -136,7 +143,7 @@ model BtcTxDetails {
 model Balance {
   id                  Int                   @id @default(autoincrement())
   walletId            Int                   @map("wallet_id")
-  cryptoTokenId       Int                   @map("cryptoToken_id")
+  cryptoTokenId       Int                   @map("crypto_token_id")
   amount              Decimal @db.Decimal(36, 18)       @default(0)
   createdAt           DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt           DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
@@ -148,6 +155,7 @@ model Balance {
   receiverTransactions Transaction[]        @relation("Receiver")
 
   @@unique([walletId, cryptoTokenId])
+  @@index([walletId])
   @@map("balance")
 }
 
