@@ -20,6 +20,7 @@ model User {
   banned          Boolean  @default(false)
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   sessionTokens SessionToken[]
   emailVerifications EmailVerification[]
@@ -36,7 +37,7 @@ model Wallet {
   blockchainId    Int       @map("blockchain_id")
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
-  deletedAt       DateTime? @map("deleted_at")
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   blockchain      Blockchain @relation(fields: [blockchainId], references: [id], onDelete: Cascade)
@@ -51,8 +52,8 @@ model SessionToken {
   id         Int       @id @default(autoincrement())
   userId     Int       @map("user_id")
   token      String    @unique
-  expiresAt  DateTime  @map("expires_at")
-  revokedAt  DateTime? @map("revoked_at")
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz(3)
+  revokedAt  DateTime? @map("revoked_at") @db.Timestamptz(3)
   createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 
@@ -67,8 +68,8 @@ model EmailVerification {
   userId     Int       @map("user_id")
   token      String    @unique
   used       Boolean   @default(false)
-  usedAt     DateTime?
-  expiresAt  DateTime  @map("expires_at")
+  usedAt     DateTime? @db.Timestamptz(3)
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz(3)
   createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 
@@ -147,7 +148,7 @@ model Balance {
   amount              Decimal @db.Decimal(36, 18)       @default(0)
   createdAt           DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt           DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
-  deletedAt           DateTime?             @map("deleted_at")
+  deletedAt           DateTime?             @map("deleted_at") @db.Timestamptz(3)
 
   wallet               Wallet               @relation(fields: [walletId], references: [id], onDelete: Cascade)
   cryptoToken          CryptoToken          @relation(fields: [cryptoTokenId], references: [id], onDelete: Cascade)
@@ -168,7 +169,7 @@ model CryptoToken {
   decimals        Int
   createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
-  deletedAt       DateTime?          @map("deleted_at")
+  deletedAt       DateTime?          @map("deleted_at") @db.Timestamptz(3)
 
   balances        Balance[]
   blockchain      Blockchain         @relation(fields: [blockchainId], references: [id], onDelete: Cascade)
@@ -184,7 +185,7 @@ model Blockchain {
   nativeSymbol    String     @map("native_symbol")                               
   createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
-  deletedAt       DateTime?  @map("deleted_at")
+  deletedAt       DateTime?  @map("deleted_at") @db.Timestamptz(3)
 
   wallets        Wallet[]
   cryptoTokens   CryptoToken[]
