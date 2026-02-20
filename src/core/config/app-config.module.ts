@@ -7,8 +7,7 @@ import { validationSchema } from './config.validation';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env'],
-      // expandVariables: true,
+      envFilePath: [process.env.NODE_ENV === 'test' ? '.env.test.local' : '.env'],
       validationSchema: validationSchema,
     }),
   ],

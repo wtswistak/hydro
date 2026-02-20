@@ -3,7 +3,7 @@ import * as Joi from 'joi';
 export const validationSchema = Joi.object({
   PORT: Joi.number().default(4000),
   NODE_ENV: Joi.string()
-    .valid('development', 'stage', 'production')
+    .valid('development', 'stage', 'production', 'test')
     .default('development'),
   API_KEY: Joi.string().required(),
   MAILERSEND_API_KEY: Joi.string().required(),
