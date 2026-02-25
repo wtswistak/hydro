@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  ParseIntPipe,
   Post,
   Req,
   UseGuards,
@@ -41,5 +43,14 @@ export class WalletController {
         token: balance.cryptoToken,
       })),
     }));
+  }
+
+  @Post(':walletId/top-up')
+  @UseGuards(AuthGuard('jwt'))
+  topUpWallet(
+    @Req() req: AuthRequest,
+    @Param('walletId', ParseIntPipe) walletId: number,
+  ) {
+    return this.walletService.topUpWallet({ walletId, userId: req.user.id });
   }
 }

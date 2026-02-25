@@ -86,4 +86,10 @@ export class WalletRepository {
     });
     return wallets.map((w) => w.blockchainId);
   }
+
+  getSystemWalletByBlockchainId({ blockchainId }: { blockchainId: number }) {
+    return this.prisma.wallet.findFirst({
+      where: { isSystemWallet: true, blockchainId },
+    });
+  }
 }
