@@ -23,7 +23,7 @@ export class NotificationService {
   }
 
   async sendVerificationEmailByBrevo({ email, token }: SendVerificationEmail) {
-    const verificationLink = `${this.appConfigService.apiUrl}verify-email?token=${token}`;
+    const verificationLink = `${this.appConfigService.frontendUrl}verify?token=${token}`;
     const html = `
       <h1>Hello</h1>
       <p>Click the link below to verify your email:</p>
