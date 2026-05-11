@@ -17,6 +17,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { FeePredictionModule } from './modules/fee-prediction/fee-prediction.module';
 import { BitcoinModule } from './integrations/bitcoin/bitcoin.module';
 import { MarketModule } from './modules/market/market.module';
+import { CronModule } from './jobs/cron/cron.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { MarketModule } from './modules/market/market.module';
     FeePredictionModule,
     BitcoinModule,
     MarketModule,
+    CronModule,
   ],
 })
 export class AppModule {}
