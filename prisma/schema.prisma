@@ -88,7 +88,7 @@ model Transaction {
   senderBalanceId   Int?              @map("sender_balance_id")
   receiverBalanceId Int?              @map("receiver_balance_id")
   status            TransactionStatus @default(PENDING)
-  hash              String?           @unique
+  hash              String?
   blockchainId      Int               @map("blockchain_id")
   blockRef          BigInt?           @map("block_ref")
   cryptoFee         Decimal?          @map("crypto_fee")
@@ -105,6 +105,7 @@ model Transaction {
   @@index([senderBalanceId])
   @@index([receiverBalanceId])
   @@index([blockchainId])
+  @@index([hash])
   @@map("transaction")
 }
 
@@ -127,6 +128,8 @@ model EvmTxDetails {
 model BtcTxDetails {
   id              Int       @id @default(autoincrement())
   transactionId   Int       @unique @map("transaction_id")
+  txid            String?
+  vout            Int?
   vsize           Int?
   weight          Int?
   feeRate         Float?    @map("fee_rate")
@@ -139,6 +142,7 @@ model BtcTxDetails {
 
   transaction     Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
 
+  @@unique([txid, vout])
   @@map("btc_tx_details")
 }
 
