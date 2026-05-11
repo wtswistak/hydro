@@ -6,6 +6,7 @@ import * as bip39 from 'bip39';
 import ECPairFactory from 'ecpair';
 import { MempoolService } from './mempool/mempool.service';
 import { BitcoinWallet } from './types/bitcoin.types';
+import { MempoolTransaction } from './types/mempool-api.interface';
 
 bitcoin.initEccLib(ecc);
 const bip32 = BIP32Factory(ecc);
@@ -63,8 +64,14 @@ export class BitcoinService {
     }
   }
 
-  async getTransaction(txid: string) {
+  async getTransaction(txid: string): Promise<MempoolTransaction> {
     return this.mempoolApi.getTransaction(txid);
+  }
+
+  async getAddressTransactions(
+    address: string,
+  ): Promise<MempoolTransaction[]> {
+    return this.mempoolApi.getAddressTransactions(address);
   }
 
   /**
@@ -101,13 +108,13 @@ export class BitcoinService {
       // Logic fallback if no UTXOs: assume 1 input 2 outputs for estimation
       return this.estimateFee(1, 2);
     }
-    
+
     // In a real implementation we would select specific UTXOs.
     // Here we assume utilizing all (or first N needed) to simplistic estimation
     // For now, let's use the count of UTXOs that covers the balance or just all utxos
     // A better approach is "Coin Selection" logic.
     // For estimation purposes, we can try to simluate using 1 input if balance allows, or more.
-    
+
     // Quick estimation: 1 input, 2 outputs
     return this.estimateFee(1, 2);
   }

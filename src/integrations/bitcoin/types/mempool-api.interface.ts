@@ -24,16 +24,16 @@ export interface MempoolTransaction {
   vin: Array<{
     txid: string;
     vout: number;
-    prevout: {
+    prevout?: {
       scriptpubkey: string;
-      scriptpubkey_address: string;
+      scriptpubkey_address?: string;
       value: number;
     };
     sequence: number;
   }>;
   vout: Array<{
     scriptpubkey: string;
-    scriptpubkey_address: string;
+    scriptpubkey_address?: string;
     value: number;
   }>;
   size: number;

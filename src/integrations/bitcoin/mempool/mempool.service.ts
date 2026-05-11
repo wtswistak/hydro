@@ -67,6 +67,10 @@ export class MempoolService {
     return this.request<MempoolTransaction>(`/tx/${txid}`);
   }
 
+  async getAddressTransactions(address: string): Promise<MempoolTransaction[]> {
+    return this.request<MempoolTransaction[]>(`/address/${address}/txs`);
+  }
+
   /**
    * Get raw transaction hex
    */
