@@ -1,5 +1,7 @@
 export interface CreateBtcDetailsData {
   transactionId: number;
+  txid?: string;
+  vout?: number;
   vsize?: number;
   weight?: number;
   feeRate?: number;

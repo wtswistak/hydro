@@ -27,16 +27,21 @@ export class TransactionWorker extends WorkerHost {
         `Processing transaction check for txHash: ${txHash}, txId: ${txId}`,
       );
 
-      const dbTx = await this.transactionService.getTxByHash({ hash: txHash });
+      const dbTx = await this.transactionService.getTxById({ id: txId });
       if (!dbTx) {
-        throw new Error(`Transaction ${txHash} not found in database`);
+        throw new Error(`Transaction id ${txId} not found in database`);
+      }
+
+      const blockchainTxHash = dbTx.hash ?? txHash;
+      if (!blockchainTxHash) {
+        throw new Error(`Transaction id ${txId} has no blockchain hash`);
       }
 
       if (dbTx.blockchain.type === BlockchainType.BITCOIN) {
-        return this.processBitcoinTransaction(txHash, txId);
+        return this.processBitcoinTransaction(blockchainTxHash, txId);
       }
 
-      return this.processEvmTransaction(txHash, txId);
+      return this.processEvmTransaction(blockchainTxHash, txId);
     } catch (error) {
       this.logger.error(`Error processing transaction check:`, {
         message: error.message,

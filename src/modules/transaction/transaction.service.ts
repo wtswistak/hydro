@@ -282,8 +282,15 @@ export class TransactionService {
   }
 
   getTxByHash({ hash }: { hash: string }) {
-    return this.prisma.transaction.findUnique({
+    return this.prisma.transaction.findFirst({
       where: { hash },
+      include: { evmDetails: true, btcDetails: true, blockchain: true },
+    });
+  }
+
+  getTxById({ id }: { id: number }) {
+    return this.prisma.transaction.findUnique({
+      where: { id },
       include: { evmDetails: true, btcDetails: true, blockchain: true },
     });
   }
