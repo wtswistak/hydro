@@ -1,8 +1,3 @@
--- Allow multiple application records for one BTC transaction hash.
-DROP INDEX IF EXISTS "transaction_hash_key";
-
-CREATE INDEX IF NOT EXISTS "transaction_hash_idx" ON "transaction"("hash");
-
 ALTER TABLE "btc_tx_details"
   ADD COLUMN "txid" TEXT,
   ADD COLUMN "vout" INTEGER;

@@ -282,7 +282,7 @@ export class TransactionService {
   }
 
   getTxByHash({ hash }: { hash: string }) {
-    return this.prisma.transaction.findFirst({
+    return this.prisma.transaction.findUnique({
       where: { hash },
       include: { evmDetails: true, btcDetails: true, blockchain: true },
     });

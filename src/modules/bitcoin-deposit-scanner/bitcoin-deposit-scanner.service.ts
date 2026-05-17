@@ -87,6 +87,8 @@ export class BitcoinDepositScannerService {
     vout: number;
     valueSatoshis: number;
   }): Promise<void> {
+    const depositHash = this.getDepositHash(tx.txid, vout);
+
     await this.prisma.$transaction(async (prismaTx) => {
       const existingDetails = await prismaTx.btcTxDetails.findFirst({
         where: {
@@ -111,6 +113,7 @@ export class BitcoinDepositScannerService {
         prismaTx,
         wallet,
         tx,
+        depositHash,
         vout,
         valueSatoshis,
       });
@@ -121,12 +124,14 @@ export class BitcoinDepositScannerService {
     prismaTx,
     wallet,
     tx,
+    depositHash,
     vout,
     valueSatoshis,
   }: {
     prismaTx: PrismaClient;
     wallet: { id: number; address: string; blockchainId: number };
     tx: MempoolTransaction;
+    depositHash: string;
     vout: number;
     valueSatoshis: number;
   }): Promise<void> {
@@ -171,7 +176,7 @@ export class BitcoinDepositScannerService {
         status,
         senderAddress: this.getSenderAddress(tx),
         receiverAddress: wallet.address,
-        hash: tx.txid,
+        hash: depositHash,
         blockchainId: wallet.blockchainId,
         senderBalanceId: null,
         receiverBalanceId: receiverBalance.id,
@@ -256,5 +261,9 @@ export class BitcoinDepositScannerService {
   private getSenderAddress(tx: MempoolTransaction): string {
     return tx.vin.find((input) => input.prevout?.scriptpubkey_address)?.prevout
       ?.scriptpubkey_address ?? 'external';
+  }
+
+  private getDepositHash(txid: string, vout: number): string {
+    return `${txid}:${vout}`;
   }
 }
