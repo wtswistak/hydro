@@ -46,6 +46,10 @@ export class BitcoinDepositScannerService {
             tx,
           });
         }
+
+        this.logger.debug(
+          `Scanned Bitcoin wallet id: ${wallet.id}, transactions: ${transactions.length}`,
+        );
       } catch (error) {
         this.logger.error(
           `Bitcoin deposit scan failed for wallet id: ${wallet.id}`,
@@ -199,6 +203,10 @@ export class BitcoinDepositScannerService {
         outputs: tx.vout,
       },
     });
+
+    this.logger.log(
+      `Bitcoin deposit created: txId=${transaction.id}, walletId=${wallet.id}, amount=${amount}, status=${status}`,
+    );
   }
 
   private async updateExistingDeposit({
@@ -210,9 +218,20 @@ export class BitcoinDepositScannerService {
     existingDetails: any;
     tx: MempoolTransaction;
   }): Promise<void> {
-    const wasPending =
-      existingDetails.transaction.status === TransactionStatus.PENDING;
     const isConfirmed = tx.status.confirmed;
+    const isPending =
+      existingDetails.transaction.status === TransactionStatus.PENDING;
+
+    if (!isPending) {
+      return;
+    }
+
+    if (!isConfirmed) {
+      this.logger.debug(
+        `Bitcoin deposit still pending: txId=${existingDetails.transactionId}, txid=${tx.txid}`,
+      );
+      return;
+    }
 
     await prismaTx.btcTxDetails.update({
       where: { transactionId: existingDetails.transactionId },
@@ -225,10 +244,6 @@ export class BitcoinDepositScannerService {
         outputs: tx.vout,
       },
     });
-
-    if (!wasPending || !isConfirmed) {
-      return;
-    }
 
     await prismaTx.transaction.update({
       where: { id: existingDetails.transactionId },
@@ -250,6 +265,10 @@ export class BitcoinDepositScannerService {
         },
       });
     }
+
+    this.logger.log(
+      `Bitcoin deposit confirmed: txId=${existingDetails.transactionId}, txid=${tx.txid}, amount=${existingDetails.transaction.amount}`,
+    );
   }
 
   private satoshisToBtc(valueSatoshis: number): string {
@@ -259,8 +278,10 @@ export class BitcoinDepositScannerService {
   }
 
   private getSenderAddress(tx: MempoolTransaction): string {
-    return tx.vin.find((input) => input.prevout?.scriptpubkey_address)?.prevout
-      ?.scriptpubkey_address ?? 'external';
+    return (
+      tx.vin.find((input) => input.prevout?.scriptpubkey_address)?.prevout
+        ?.scriptpubkey_address ?? 'external'
+    );
   }
 
   private getDepositHash(txid: string, vout: number): string {
